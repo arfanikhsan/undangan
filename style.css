@@ -1107,16 +1107,16 @@ height: 200vh;
 }
 .sec-10 .container #text-4{
   position: absolute;
-  width: 67vw;
-  bottom: 99vh;
-  right: 25vw;
+  width: 48vw;
+  bottom: 88vh;
+  right: 48vw;
   z-index: 22;
-  text-align: center;
+  text-align: left;
   font-family: "Playwrite AU NSW", cursive;
-  font-size: .9em;
   font-weight: 50;
-  line-height: 1em;
+  line-height: 2.5em;
   color: #c64777;
+  font-size: .6em;
 }
 
 
@@ -1141,7 +1141,7 @@ height: 200vh;
   width: 165vw;
   top: 180vh;
   z-index: 9;
-  right: -34vw;
+  right: -29vw;
 } 
 
 
