@@ -446,8 +446,8 @@ height: 200vh;
 
 .sec-3  .container #blob-5{
   position: absolute;
-  width: 37vw;
-  left: 7vw;
+  width: 28vw;
+  left: 18vw;
   top: 0vh;
 }
 
@@ -490,7 +490,7 @@ height: 200vh;
 .sec-4 .container #text-2{
   position: absolute;
   width: 52vw;
-  top: 104vh;
+  top: 108vh;
   right: 6vw;
   z-index: 22;
 }
@@ -560,7 +560,7 @@ height: 200vh;
 .sec-4  .container #clouds-16{
   position: absolute;
   width: 110vw;
-  top: 99vh;
+  top: 102vh;
   left: -28vw;
   z-index: 14;
 }
