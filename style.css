@@ -8,10 +8,19 @@ body, html {
   margin: 0;
   padding: 0;
   overflow-x: hidden;
+  font: Kanit;
 }
 
 * {
   box-sizing: border-box;
+}
+
+
+.container{
+  position: absolute;
+  overflow: hidden;
+  width: 100vw;
+
 }
 
 .overlay {
@@ -33,15 +42,27 @@ body, html {
   text-align: center;
 }
 
-.welcome-content h1{
+.undangan-nama{
   position: absolute;
-  text-align: right;
+  text-align: left;
   width: 62vw;
-  right: 13vw;
-  bottom: 9vh;
+  left: 9vw;
+  bottom: 3vh;
   /* rotate: 9deg; */
   color: #5a5585;
+
 }
+.undangan-nama h1{
+  color: #cd1e49;
+  margin: 0;
+  font-size: 1.2rem;
+  max-width: 50vw;
+  border: none;
+  border-radius: 5px;
+  background-color: #fae9fc;
+  padding-left: 10px;
+}
+
   
 button {
   position: absolute;
@@ -50,7 +71,6 @@ button {
   padding: 10px 20px;
   font-size: 15px;
   cursor: pointer;
-  /* margin-top: 22px; */
   border: none;
   border-radius: 5px;
   background-color: #5a5585;
@@ -125,12 +145,6 @@ height: 200vh;
 
 
 
-.container{
-  position: absolute;
-  overflow-x: hidden;
-  width: 100vw;
-
-}
 
 .container #blob-1{
   position: absolute;
@@ -409,7 +423,7 @@ height: 200vh;
   position: absolute;
   width: 20vw;
   top: 295vh;
-  z-index: 12;
+  z-index: 9999 ;
   left: 30vw;
 }
 
@@ -1020,7 +1034,7 @@ height: 200vh;
 }
 
 .sec-10 .container{
-  height: 500vh;
+  height: 350vh;
 }
 
 .sec-10 #text-1{ 
@@ -1069,28 +1083,26 @@ height: 200vh;
 .sec-10 .container #text-2{
   position: absolute;
   width: 67vw;
-  bottom: 95vh;
-  right: 49vw;
+  bottom: 98vh;
+  right: 28vw;
   z-index: 22;
   text-align: center;
   font-family: Abril Fatface;
-  font-size: 2em;
-  font-weight: 50;
+  font-size: 1.5em;
   line-height: 1em;
-  color: #302447;
+  color: #c64777;
 }
 .sec-10 .container #text-3{
   position: absolute;
   width: 103vw;
-  bottom: 90vh;
+  bottom: 94vh;
   right: 24vw;
   z-index: 22;
   text-align: center;
   font-family: Abril Fatface;
-  font-size: 2em;
-  font-weight: 50;
+  font-size: 1.5em;
   line-height: 1em;
-  color: #302447;
+  color: #c64777;
 }
 .sec-10 .container #text-4{
   position: absolute;
@@ -1143,7 +1155,7 @@ height: 200vh;
 
 .sec-11 {
   width: 100vw;
-  height: 300vh;
+  height: 200vh;
   display: flex;
   justify-content: center;
   background-size: cover;
@@ -1152,6 +1164,10 @@ height: 200vh;
 
 .sec-11 .container{
   height: 200vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: start;
+  align-items: center;
 }
 .sec-11  .container #path-11{
   position: absolute;
@@ -1161,3 +1177,76 @@ height: 200vh;
   right: 39vw;
 } 
 
+.wedding {
+  margin-top: 30vh;
+  z-index: 22;
+  text-align: center;
+} 
+
+
+.wedding h2{
+  font-family: "Playwrite AU NSW", cursive;
+  font-size: 1.5em;
+  font-weight: 100;
+  line-height: 1em;
+  color: #c64777;
+  margin: 0;
+  margin: 50px 0;
+  width: 80vw;
+  line-height: 1.5em;
+} 
+
+.wedding p{
+  font-family: kanit;
+  font-size: .8em;
+  font-weight: 300;
+  line-height: 2em;
+  color: #000000;
+  width: 80vw;
+  text-align: center;
+} 
+
+.wedding h1{
+  z-index: 22;
+  font-family: Abril Fatface;
+  font-size: 4em;
+  font-weight: 50;
+  line-height: 1em;
+  width: 80vw;
+  color: #c64777;
+  margin: 50px 0;
+  
+} 
+
+a:active
+{
+  color: #df9bb5;
+  font-style: normal;
+  text-decoration: none;
+} 
+
+a
+{
+  color: #6d2742;
+  font-style: normal;
+  text-decoration: none;
+} 
+a:visited
+{
+  color: #c64777;
+  font-style: normal;
+  
+} 
+.wedding img{
+ width: 60vw;
+ height: 60vw;
+ margin: 0;
+ padding: 0;
+ padding-bottom: 50px;
+} 
+
+.end{
+  position: absolute;
+  bottom: 5vw;  
+  font-size: .9rem;
+} 
