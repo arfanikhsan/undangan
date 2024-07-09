@@ -385,7 +385,7 @@ height: 200vh;
 }
 
 .sec-3 .container{
-  height: 200vh;
+  height: 185vh;
 }
 
 .sec-3 .container #text-1{
@@ -462,7 +462,7 @@ height: 200vh;
   position: absolute;
   width:125vw;
   left: -5vw;
-  top: 158vh;
+  top: 166vh;
   z-index: 14;
 }
 
