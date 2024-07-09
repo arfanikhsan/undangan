@@ -44,24 +44,23 @@ body, html {
 }
 
 .undangan-nama{
-  position: absolute;
-  text-align: left;
-  width: 62vw;
-  left: 9vw;
-  bottom: 3vh;
-  /* rotate: 9deg; */
-  color: #5a5585;
-
+    position: absolute;
+    text-align: center;
+    width: 72vw;
+    left: 15vw;
+    bottom: 45vh;
+    color: #5a5585;
 }
+
 .undangan-nama h1{
-  color: #cd1e49;
-  margin: 0;
-  font-size: 1.2rem;
-  max-width: 50vw;
-  border: none;
-  border-radius: 5px;
-  background-color: #fae9fc;
-  padding-left: 10px;
+    color: #cd1e49;
+    margin: 0;
+    font-size: 1.2rem;
+    max-width: 80vw;
+    border: none;
+    border-radius: 14px;
+    background-color: #fae9fca8;
+    padding: 5px;
 }
 
   
