@@ -1,354 +1,1252 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nicky  & Faisal</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
+
+@import url('https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+@import url('https://fonts.googleapis.com/css2?family=Playwrite+AU+NSW:wght@100..400&display=swap');
+
+body, html {
+  width: 100vw;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  font: Kanit;
+}
+
+* {
+  box-sizing: border-box;
+}
 
 
-    <audio id="clickSound" src="MP3/song.MP3"></audio>
-    <div id="welcomeOverlay" class="overlay">
-        <div class="welcome-content">
-            <h1 id="undangan"></h1>
-            <button id="enterButton">Enter</button>
-        </div>
-    </div>
+.container{
+  position: absolute;
+  overflow: hidden;
+  width: 100vw;
 
-    <section class="sec-1">
-        <div class="container">
-            <img src="SVG/Strng Heart.svg" id="strng-heart">
-            <img src="SVG/Strng 1.svg" id="strng-1">
-            <img src="SVG/Strng 1.svg" id="strng-2">
-            <img src="SVG/Strng 2.svg" id="strng-3">
-            <img src="SVG/Strng 2.svg" id="strng-4">
-            <img src="SVG/Clouds 1.svg" id="clouds-1">
-            <img src="SVG/Phase 2.svg" id="phase-2">
-            <img src="SVG/Clouds 2.svg" id="clouds-2">
-            <img src="SVG/Clouds 4.svg" id="clouds-4">
+}
 
-            <audio id="sound2" src="MP3/The threads . . ..MP3"></audio>
-            <div class="narate hidden" id="text-1">
-                <h3 id="target-div2">The threads . . </h3>
-                <p class="translate hidden">
-                    Benang-benang itu...</p>
-            </div>
-            <audio id="sound3" src="MP3/Dspersed.MP3"></audio>
-            <div class="narate hidden" id="text-2">
-                <h3 id="target-div3">Dispersed. . . </h3>
-                <p class="translate hidden">
-                    Tersebar dalam ruang dan waktu...</p>
-            </div>
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url(SVG/welcomee.svg);
+  background-size: cover;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  z-index: 1000;
+}
 
+.welcome-content {
+  text-align: center;
+}
 
-            
-        </div>
+.undangan-nama{
+  position: absolute;
+  text-align: left;
+  width: 62vw;
+  left: 9vw;
+  bottom: 3vh;
+  /* rotate: 9deg; */
+  color: #5a5585;
 
-        <img src="SVG/Long strng.svg" id="long-strng">
+}
+.undangan-nama h1{
+  color: #cd1e49;
+  margin: 0;
+  font-size: 1.2rem;
+  max-width: 50vw;
+  border: none;
+  border-radius: 5px;
+  background-color: #fae9fc;
+  padding-left: 10px;
+}
 
-        <h1 class="hidden" >The Threads of destiny</h1>
-        <p class="translate hidden">Benang-Benang Takdir</p>
-
-        <audio id="sound1" src="MP3/The thread of destny.MP3"></audio>
-        <div class="sub-title">
-            <h2 class="hidden" id="target-div1"> When Classmates Became Soulmates</h2>
-            <p class="translate hidden">Ketika Teman Sekelas Menjadi Belahan Jiwa</p>
-        </div>
-
-    </section>
-
-    <section class="sec-2">
-        <div class="container">
-            <img src="SVG/Clouds 5.svg" id="clouds-5">
-            <img src="SVG/Clouds 6.svg" id="clouds-6">
-            <img src="SVG/Clouds 7.svg" id="clouds-7">
-            <img src="SVG/Clouds 8.svg" id="clouds-8">
-            <img src="SVG/Clouds 10.svg" id="clouds-10">
-            <img src="SVG/Clouds 13.svg" id="clouds-13">
-            <img src="SVG/Phase 3/bush-1.svg" id="bush-1">
-            <img src="SVG/Phase 3/bush-2.svg" id="bush-2">
-            <img src="SVG/Phase 3/bush-3.svg" id="bush-3">
-
-            <audio id="sound4" src="MP3/Watng to be kept.MP3"></audio>
-            <div class="narate hidden" id="text-1">
-                <h3 id="target-div4">Waiting to be kept. </h3>
-                <p class="translate hidden">
-                    Menanti untuk dirangkai...
-</p>
-            </div>
-            <audio id="sound5" src="MP3/To be takng care of.MP3"></audio>
-            <div class="narate hidden" id="text-2">
-                <h3 id="target-div5">And taken care of.</h3>
-                <p class="translate hidden">
-                    Dan dirawat dengan penuh cinta...</p>
-            </div>
-            <audio id="sound6" src="MP3/Then they were found.MP3"></audio>
-            <div class="narate hidden" id="text-3">
-                <h3 id="target-div6">Has been found </h3>
-                <p class="translate hidden">
-                    Telah ditemukan...
-
-</p>
-            </div>
+  
+button {
+  position: absolute;
+  bottom: 3vh;
+  left: 69vw;
+  padding: 10px 20px;
+  font-size: 15px;
+  cursor: pointer;
+  border: none;
+  border-radius: 5px;
+  background-color: #5a5585;
+  color: white;
+}
 
 
-        </div>
-    </section>
+.hidden {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
 
-    <section class="sec-3">
-        <img src="SVG/Phase 3/boy-1.svg" id="boy-1">
-        <div class="container">
-            <img src="SVG/Phase 3/thread-2.svg" id="thread-2">
-            <img src="SVG/Phase 3/boy-2.svg" id="boy-2">
-            <img src="SVG/Phase 3/gurl-1.svg" id="gurl-1">
-            <img src="SVG/Phase 3/blob-4.svg" id="blob-4">
-            <img src="SVG/Phase 3/blob-4.svg" id="blob-5">
-            <img src="SVG/Phase 3/blob-4.svg" id="blob-6">
-            <img src="SVG/Phase 4/blobs-x.svg" id="blobs-x">
+.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
 
-            <div class="narate hidden" id="text-1">
-                <h3>Then, they were found by a pair of younglings. </h3>
-                <p class="translate hidden">
-                    oleh sepasang jiwa muda
+.translate{
+  font-family:  "Playwrite AU NSW", cursive;
+  font-size: .8em;
+  font-weight: 500;
+  color: #000000;
+  line-height: 1.5em;
+  text-align: left;
+}
 
+.narate h3{
+  font-family: kanit;
+  font-size: 1.2em;
+  font-weight: 300;
+  line-height: 1em;
+  color: #8b1130;
+  padding: 0;
+  margin: 0;
+}
 
-</p>
-            </div>
-        </div>
-    </section>
-
-    <section class="sec-4">
-        <div class="container">
-            <img src="SVG/Phase 4/grd-2.svg" id="grd-2">
-            <img src="SVG/Phase 4/grd-1.svg" id="grd-1">
-            <img src="SVG/Phase 4/Board.svg" id="board">
-            <img src="SVG/Phase 4/boy-3.svg" id="boy-3">
-            <img src="SVG/Phase 4/gurl-2.svg" id="gurl-2">
-            <img src="SVG/Phase 4/clock.svg" id="clock">
-            <img src="SVG/Phase 4/clouds-14.svg" id="clouds-14">
-            <img src="SVG/Phase 4/clouds-15.svg" id="clouds-15">
-            <img src="SVG/Phase 4/clouds-16.svg" id="clouds-16">
-            <img src="SVG/Phase 4/School_2.svg" id="school">
-            <img src="SVG/Phase 4/Bush-1.svg" id="bush-1">
-            <img src="SVG/Phase 4/Bush-2.svg" id="bush-2">
-            <img src="SVG/Phase 4/road-1.svg" id="road-1">
-            <img src="SVG/Phase 4/road-2.svg" id="road-2">
-            <img src="SVG/Phase 4/BG.svg" id="bg">
-            <img src="SVG/Phase 4/door-left.svg" id="door-left">
-            <img src="SVG/Phase 4/door-rght.svg" id="door-rght">
+.narate .translate{
+  margin:0;
+  padding-top: 10px;
+}
 
 
+.sec-1 {
+  width: 100%;
+  height: 180vh;
+  display: flex; 
+  background: rgb(250,233,252);
+  background: linear-gradient(180deg, #baa3c1 0%, rgba(198,71,119,1) 100%);
+  flex-direction: column;
+  align-items: center;
+  justify-content: start;
+}
 
-            <audio id="sound6" src="MP3/Then they were found.MP3"></audio>
-            <div class="narate hidden" id="text-1">
-                <h3 id="target-div6">Has been found keeping it together.</h3>
-                <p class="translate hidden">
-                    Namun mereka tak menyadari jika mereka merangkainya bersama
+.sec-1 .container{
+height: 200vh;
+}
 
+.sec-1 .container #text-1{
+  position: absolute;
+  width: 24vw;
+  top: 100vh;
+  right: 5vw;
+}
 
-</p>
-            </div>
-            <audio id="sound9" src="MP3/Same classroom.MP3"></audio>
-            <div class="narate hidden" id="text-2">
-                <h3 id="arget-div9">Within the same classroom</h3>
-                <p class="translate hidden">
-                    Di dalam kelas yang sama</p>
-            </div>
-
-
-    </section>
-    
-    <section class="sec-5">
-        <div class="container">
-            <img src="SVG/Phase 5/blobs-compound-1.svg" id="blobs-1">
-            <img src="SVG/Phase 5/path-1.svg" id="path-1">
-            <img src="SVG/Phase 5/gurl-journey-1.svg" id="gurl-1">
-            <img src="SVG/Phase 5/blobs-compound-2.svg" id="blobs-2">
-            <img src="SVG/Phase 5/path-2.svg" id="path-2">
-            <img src="SVG/Phase 5/boy-journey-1.svg" id="boy-1">
-
-            <audio id="sound10" src="MP3/The pa1r seperated.MP3"></audio>
-            <div class="narate hidden" id="text-1">
-                <h3 id="arget-div10">The pair separated,
-                </h3>
-                <p class="translate hidden">
-                    Kedua hati itu terpisah
-</p>
-            </div>
-
-            <audio id="sound11" src="MP3/Pursu1ng future.MP3"></audio>
-            <div class="narate hidden" id="text-2">
-                <h3 id="arget-div11">Pursuing their own futures,
-                </h3>
-                <p class="translate hidden">
-                    Mengejar mimpi masing-masing</p>
-            </div>
-        </div>       
-    </section> 
-
-    <section class="sec-6">
-        <div class="container">
-            <img src="SVG/Phase 5/blobs-compound-3.svg" id="blobs-3">
-            <img src="SVG/Phase 5/path-3.svg" id="path-3">
-            <img src="SVG/Phase 5/gurl-journey-2.svg" id="gurl-2">
-            <img src="SVG/Phase 5/blobs-compound-4.svg" id="blobs-4">
-            <img src="SVG/Phase 5/path-5.svg" id="path-4">
-            <img src="SVG/Phase 5/boy-journey-2.svg" id="boy-2">
-
-            <audio id="arget-div12" src="MP3/Hundred of m1les.MP3"></audio>
-            <div class="narate hidden" id="text-1">
-                <h3 id="arget-div12">Even hundreds of miles apart . .
-                </h3>
-                <p class="translate hidden">
-                    Terpisah ratusan kilo jauhnya . .
-                </p>
-            </div>
-
-        </div>
-        </div>       
-    </section> 
-
-    
-    <section class="sec-7">
-        <div class="container">
-            <img src="SVG/Phase 5/blobs-compound-5.svg" id="blobs-5">
-            <img src="SVG/Phase 5/path-5.svg" id="path-5">
-            <img src="SVG/Phase 5/gurl-journey-3.svg" id="gurl-3">
-            <img src="SVG/Phase 5/path-6.svg" id="path-6">
-            <img src="SVG/Phase 5/boy-journey-3.svg" id="boy-3">
-
-            <audio id="sound13" src="MP3/fu"></audio>
-            <div class="narate hidden" id="text-1">
-                <h3 id="arget-div13">No one knows what the future holds
-                </h3>
-                <p class="translate hidden">
-                    Tak seorang pun tahu apa yang disimpan oleh masa depan
-                </p>
-            </div>
-
-            <audio id="sound14" src="MP3/Not even.MP3"></audio>
-            <div class="narate hidden" id="text-2">
-                <h3 id="arget-div14">Not even the pair of the strings keeper
-                </h3>
-                <p class="translate hidden">
-                    Bahkan penjaga benang-benang itu pun tidak
-                </p>
-            </div>
-
-        </div>       
-    </section> 
-
-    <section class="sec-8">
-        <div class="container">
-            <img src="SVG/Phase 5/blobs-compound-6.svg" id="blobs-6">
-            <img src="SVG/Phase 5/blobs-compound-6.svg" id="blobs-7">
-            <img src="SVG/Phase 5/path-8.svg" id="path-8">
-            <img src="SVG/Phase 5/journey-4.svg" id="journey-4">
-
-            <audio id="sound15" src="MP3/Dspersed.MP3"></audio>
-            <div class="narate hidden" id="text-1">
-                <h3 id="arget-div15">Unless. . .
-                </h3>
-                <p class="translate hidden">
-                    Namun . . .
-                </p>
-            </div>
-
-            <audio id="sound16" src="MP3/Fate wll fnd ts way.MP3"></audio>
-            <div class="narate hidden" id="text-2">
-                <h3 id="arget-div16">Fate will always, Find its way.
-                </h3>
-                <p class="translate hidden">
-                    takdir selalu menemukan jalannya
-                </p>
-            </div>
-
-            <audio id="sound17" src="MP3/Yet the dsperse f1nd ts fate.MP3"></audio>
-            <div class="narate hidden" id="text-3">
-                <h3 id="arget-div17">Yet, the dispersed threads
-                </h3>
-                <p class="translate hidden">
-                    benang-benang yang tersebar itu
-                </p>
-            </div>
-
-        </div>       
-    </section> 
- 
-    <section class="sec-9">
-        <div class="container">
-            <img src="SVG/Phase 5/blobs-compound-7.svg" id="blobs-7">
-            <img src="SVG/Phase 5/blobs-compound-7.svg" id="blobs-8">
-            <img src="SVG/Phase 5/path-9.svg" id="path-9">
-            <img src="SVG/Phase 5/journey-5.svg" id="journey-5">
-
-            <audio id="sound18" src="MP3/"></audio>
-            <div class="narate hidden" id="text-1">
-                <h3 id="arget-div18">Found their pair.
-                </h3>
-                <p class="translate hidden">
-                    Akhirnya menemukan pasangan sejatinya.
-                </p>
-            </div>
-
-        </div>       
-    </section> 
-    
-    <section class="sec-10">
-        <div class="container">
-            <img src="SVG/Phase 5/path-10.svg" id="path-10">
-            <img src="SVG/Phase 5/path-11.svg" id="path-11">
-            <img src="SVG/Phase 5/the rope.svg" id="path-12">
-            <img src="SVG/Phase 6/Phase 6.png" id="journey-6">
-
-            <div class="narate hidden" id="text-1">
-                <p class="hidden">
-                    Seindah-indahnya perhiasan adalah wanita sholehah dan semulia-mulianya lelaki adalah memuliakan wanita Maha Suci Allah SWT yang telah menciptakan makhluk-Nya berpasang-pasang Ya Allah_berkatilah pernikahan putra-putri kami:
-                </p>
-                <h1 class="hidden"> Nicky Elfitasmi, S.IP</h1>
-                <h2 class="hidden">Binti Elvis Susianto</h2>
-                <p class="hidden">dengan</p>
-                <h1 class="hidden"> Muhammad Faisal Baihaqi S.Si
-                </h1>
-                <h2 class="hidden">Bin Drs. Bakharuddin, M.Pd
-                </h2>
-                </p>
-            </div>
-
-            <div class=" hidden" id="text-2">
-                <h1  class="hidden">15</h1>
-            </div>
-            <div class=" hidden" id="text-3">
-                <h1  class="hidden">July</h1>
-            </div>
-            <div class=" hidden" id="text-4">
-                <h1  class="hidden">Ahad</h1>
-            </div>
-
-            
-            
-        </div>       
-    </section> 
+.sec-1 .container #text-2{
+  position: absolute;
+  width: 36vw;
+  top: 144vh;
+  right: 54vw;
+}
 
 
 
-    <section class="sec-11">
-        <div class="container">
-        </div>
-    </section>
+
+.container #blob-1{
+  position: absolute;
+  width: 74vw;
+  right: -10vh;
+  top: 2vh;
+}
+
+.container #blob-2{
+  position: absolute;
+  left: -100vw;
+  scale: .2;
+  top: -15vh;
+  rotate: 90deg;
+}
+
+.container #strng-1{
+  position: absolute;
+  width: 18vw;
+  top: -15vh;
+  right: 15vw;
+}
+
+.container #strng-2{
+  position: absolute;
+  width: 18vw;
+  top: 100vh;
+  left: -10vw;
+  
+  rotate: 150deg;
+}
+
+.container #strng-3{
+  position: absolute;
+  width: 30vw;
+  top: 30vh;
+  left: -5vw;
+}
+
+.container #strng-4{
+  position: absolute;
+  width:30vw;
+  top: 65vh;
+  right: -15vw;
+  rotate: 90deg;
+}
+
+.container #clouds-1{
+  position: absolute;
+  width:120vw;
+  top: 140vh;
+  left: -15vw;
+}
+
+#phase-2{
+  width: 100vw;
+  position: absolute;
+  top: 160vh;
+}
+
+#clouds-2
+{
+  width:150vw;
+  position: absolute;
+  top: 156vh;
+  left: -30vw;
+}
+
+#clouds-4
+{
+  width:50vw;
+  position: absolute;
+  top: 165vh;
+  left: 45vw;
+}
+
+.container #strng-heart{
+  position: absolute;
+  width: 110vw;
+  top: 42vh;
+  right: -5vw;
+  z-index: 99;
+}
+
+.sec-1 h1{
+  font-family: Abril Fatface;
+  font-size: 3em;
+  font-weight: 100;
+  text-align: center;
+  width: 50vw;
+  padding-top: 10vh;
+  color: #302447;;
+  line-height: 1em;
+  margin: 0;
+  z-index: 0;
+}
 
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.10.4/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.10.4/
-    ScrollTrigger.min.js"></script>
-    <script src="script.js"></script>
-    <script>
-        const urlParams = new URLSearchParams(window.location.search);
-        const name = urlParams.get('name');
-        document.getElementById('undangan').textContent = `to: ${name}`;
-    </script>
-</body>
 
-</html>
+.sec-1 .sub-title{
+  width: 45vw;
+  position: absolute;
+  top: 75vh;
+  left: 6vw;
+  display: flex;
+  flex-direction: column;
+} 
+
+.sec-1 .sub-title h2{
+  font-family: Abril Fatface;
+  font-size: 2em;
+  font-weight: 50;
+  line-height: 1em;
+  color: #fcc0e3;
+  position: relative;
+  margin: 0;
+} 
+
+.sec-1 .sub-title p{
+  text-align: left;
+}
+
+.sec-1 #long-strng{
+  position: absolute;
+  width: 58vw;
+  top: 62vh;
+  z-index: 12;
+  left: 26vw;
+}
+
+
+.sec-2 {
+  width: 100vw;
+  height: 134vh;
+  display: flex;
+  justify-content: center;
+  background: rgb(107,163,173);
+  background: linear-gradient(180deg, rgba(107,163,173,1) 0%, rgba(189,212,204,1) 100%);
+  line-height: 1em;
+}
+
+.sec-2 .container{
+  height: 135vh;
+}
+
+
+.sec-2 .container #text-1{
+  position: absolute;
+  width: 35vw;
+  top: 17vh;
+  right: 3vw;
+}
+
+.sec-2 .container #text-2{
+  position: absolute;
+  width: 32vw;
+  top: 63vh;
+  right: 57vw;
+}
+
+.sec-2 .container #text-3{
+  position: absolute;
+  width: 10vw;
+  top: 103vh;
+  right: 28vw;
+}
+
+.sec-2 .container #clouds-5{
+  width: 120vw;
+  position: absolute;
+  left: -10vw;
+  z-index: 11;
+}
+
+.sec-2 .container #clouds-6{
+  width: 60vw;
+  position: absolute;
+  top:65vw;
+  right: -15vw;
+}
+
+.sec-2 .container #clouds-7{
+  width: 60vw;
+  position: absolute;
+  top: 7vw;
+  left: -30vw;
+}
+
+.sec-2 .container #clouds-8{
+  width: 100vw;
+  position: absolute;
+  top: 70vh;
+}
+
+.sec-2 .container #clouds-9{
+  width: 100vw;
+  position: absolute;
+  top: 180vw;
+}
+
+.sec-2 .container #clouds-10{
+  width: 100vw;
+  position: absolute;
+  top: 105vw;
+}
+
+.sec-2 .container #clouds-11{
+  width: 100vw;
+  position: absolute;
+}
+
+
+.sec-2 .container #clouds-12{
+  width: 100vw;
+  position: absolute;
+}
+
+.sec-2 .container #clouds-13{
+  width: 100vw;
+  top: 90vh;
+  position: absolute;
+}
+
+.sec-2 .container #bush-1{
+  width: 110vw;
+  top: 121vh;
+  position: absolute;
+  left: -10vw;
+}
+
+.sec-2 .container #bush-2{
+  width: 120vw;
+  top: 118vh;
+  position: absolute;
+  z-index: 11;
+}
+
+.sec-2 .container #bush-3{
+  width: 120vw;
+  top: 120vh;
+  position: absolute;
+  z-index: 11;
+}
+
+.sec-3 {
+  width: 100vw;
+  height: 180vh;
+  display: flex;
+  justify-content: center;
+  background-image: url('SVG/phase-3.svg');
+  background-size: cover;
+}
+
+.sec-3 .container{
+  height: 185vh;
+}
+
+.sec-3 .container #text-1{
+  position: absolute;
+  width: 32vw;
+  top: 26vh;
+  right: 9vw;
+}
+
+
+
+.sec-3 .container #thread-2{
+  position: absolute;
+  width: 100vw;
+  left: 20vw;
+  top: 5vh;
+  z-index: 5;
+}
+
+.sec-3  #boy-1{
+  position: absolute;
+  width: 20vw;
+  top: 295vh;
+  z-index: 9999 ;
+  left: 30vw;
+}
+
+.sec-3  .container #boy-2{
+  position: absolute;
+  width: 54vw;
+  z-index: 12;
+  left: 4vw;
+  top: 18vh;
+}
+
+.sec-3  .container #gurl-1{
+  position: absolute;
+  width: 78vw;
+  z-index: 12;
+  left: 20vw;
+  top: 53vh;
+}
+
+.sec-3  .container #gurl-1{
+  position: absolute;
+  width:80vw;
+  z-index: 12;
+  left: 20vw;
+  top: 50vh;
+}
+
+.sec-3  .container #blob-4{
+  position: absolute;
+  width:80vw;
+  left: 10vw;
+  top: 80vh;
+}
+
+.sec-3  .container #blob-5{
+  position: absolute;
+  width: 28vw;
+  left: 18vw;
+  top: 0vh;
+}
+
+.sec-3  .container #blob-6{
+  position: absolute;
+  width:160vw;
+  left: 10vw;
+  top: 120vh;
+}
+
+.sec-3  .container #blobs-x{
+  position: absolute;
+  width:125vw;
+  left: -5vw;
+  top: 166vh;
+  z-index: 14;
+}
+
+
+.sec-4 {
+  width: 100vw;
+  height: 170vh;
+  display: flex;
+  justify-content: center;
+  background-size: cover;
+  background-color: #77b2bd;
+}
+
+.sec-4 .container{
+  height: 190vh;
+}
+.sec-4 .container #text-1{
+  position: absolute;
+  width: 82vw;
+  top: 12vh;
+  right: 4vw;
+  z-index: 14;
+}
+
+.sec-4 .container #text-2{
+  position: absolute;
+  width: 52vw;
+  top: 108vh;
+  right: 6vw;
+  z-index: 22;
+}
+
+.sec-4  .container #grd-2{
+  position: absolute;
+  width: 100vw;
+  top: 17vh;
+  z-index: 14;
+}
+
+.sec-4  .container #grd-1{
+  position: absolute;
+  width:100vw;
+  top: 75vh;
+  z-index: 14;
+}
+
+.sec-4  .container #board{
+  position: absolute;
+  width: 90vw;
+  top: 42vh;
+  left: 10vw;
+  z-index: 14;
+}
+
+.sec-4  .container #boy-3{
+  position: absolute;
+  width: 35vw;
+  top: 50vh;
+  left: 54vw;
+  z-index: 14;
+}
+
+.sec-4  .container #gurl-2{
+  position: absolute;
+  width: 30vw;
+  top: 50vh;
+  left: 18vw;
+  z-index: 14;
+}
+
+.sec-4  .container #clock{
+  position: absolute;
+  width: 10vw;
+  top: 34vh;
+  left: 43vw;
+  z-index: 14;
+}
+
+.sec-4  .container #clouds-14{
+  position: absolute;
+  width: 213vw;
+  top: 98vh;
+  left: -39vw;
+  z-index: 14;
+}
+
+.sec-4  .container #clouds-15{
+  position: absolute;
+  width: 168vw;
+  top: 109vh;
+  left: -26vw;
+  z-index: 14;
+}
+
+.sec-4  .container #clouds-16{
+  position: absolute;
+  width: 110vw;
+  top: 102vh;
+  left: -28vw;
+  z-index: 14;
+}
+
+.sec-4  .container #school{
+  position: absolute;
+  width: 140vw;
+  top: 116vh;
+  left: -20vw;
+  z-index: 14;
+}
+
+.sec-4  .container #bush-2{
+  position: absolute;
+  width: 50vw;
+  z-index: 20;
+  top: 132vh;
+  left: -20vw;
+  
+}
+
+.sec-4  .container #bush-1{
+  position: absolute;
+  width: 50vw;
+  z-index: 20;
+  top: 135vh;
+  right: -20vw;
+  
+}
+
+.sec-4  .container #bg{
+  position: absolute;
+  width:110vw;
+  z-index: 20;
+  top: 135vh;
+  right: -5vw;
+  z-index: 5;
+  
+}
+
+.sec-4  .container #road-1{
+  position: absolute;
+  width: 87vw;
+  top: 148vh;
+  z-index: 6;
+  left: -38vw;
+}
+
+.sec-4  .container #road-2{
+  position: absolute;
+  width:100vw;
+  top: 147vh;
+  z-index: 6;
+  right: -48vw;
+} 
+
+.sec-4  .container #door-left{
+  position: absolute;
+  width: 9vw;
+  top: 135vh;
+  z-index: 8;
+  left: 50vw;
+} 
+
+.sec-4  .container #door-rght{
+  position: absolute;
+  width: 9vw;
+  top: 135vh;
+  z-index: 8;
+  right: 50vw;
+} 
+
+.sec-5 {
+  width: 100vw;
+  height: 250vh;
+  display: flex;
+  justify-content: center;
+  background-size: cover;
+  background-color: #c2d7ce;
+}
+
+.sec-5 .container{
+  height: 250vh;
+}
+
+.sec-5 .container #text-1{
+  position: absolute;
+  width: 61vw;
+  top: 46vh;
+  right: 7vw;
+  z-index: 22;  
+}
+
+.sec-5 .container #text-2{
+  position: absolute;
+  width: 59vw;
+  top: 236vh;
+  right: 18vw;
+  z-index: 22;
+}
+
+
+.sec-5  .container #blobs-1{
+  position: absolute;
+  width: 146vw;
+  top: 88vh;
+  z-index: 4;
+  right: -43vw;
+} 
+
+.sec-5  .container #gurl-1{
+  position: absolute;
+  width: 70vw;
+  top: 87vh;
+  z-index: 8;
+  right: 34vw;
+} 
+
+.sec-5  .container #path-1{
+  position: absolute;
+  width: 150vw;
+  top: 94vh;
+  z-index: 8;
+  right: -5vw;
+} 
+
+.sec-5  .container #blobs-2{
+  position: absolute;
+  width: 121vw;
+  top: 134vh;
+  z-index: 4;
+  right: -13vw;
+}
+
+
+.sec-5  .container #boy-1{
+  position: absolute;
+  width: 70vw;
+  top: 126vh;
+  z-index: 8;
+  right: 4vw;
+}
+
+
+.sec-5  .container #path-2{
+  position: absolute;
+  width: 177vw;
+  top: 153vh;
+  z-index: 8;
+  right: -26vw;
+} 
+
+
+.sec-6 {
+  width: 100vw;
+  height: 250vh;
+  display: flex;
+  justify-content: center;
+  background-size: cover;
+  background-color: #c2d7ce;
+}
+
+.sec-6 .container{
+  height: 250vh;
+}
+
+.sec-6 .container #text-1{
+  position: absolute;
+  width: 34vw;
+  top: 80vh;
+  right: 14vw;
+  z-index: 22;
+
+  text-align: center;
+}
+
+.sec-6 .container #text-1 .translate{
+  text-align: center;
+}
+
+
+.sec-6  .container #blobs-3{
+  position: absolute;
+  width: 91vw;
+  top: 89vh;
+  z-index: 4;
+  right: 15vw;
+} 
+
+.sec-6  .container #gurl-2{
+  position: absolute;
+  width: 66vw;
+  top: 95vh;
+  z-index: 7;
+  right: 33vw;
+} 
+
+.sec-6  .container #path-3{
+  position: absolute;
+  width: 150vw;
+  top: 94vh;
+  z-index: 8;
+  right: -5vw;
+} 
+
+.sec-6  .container #blobs-4{
+  position: absolute;
+  width: 86vw;
+  top: 158vh;
+  z-index: 4;
+  right: -13vw;
+}
+
+.sec-6  .container #boy-2{
+  position: absolute;
+  width: 61vw;
+  top: 141vh;
+  z-index: 7;
+  right: -5vw;
+}
+
+.sec-6  .container #path-4{
+  position: absolute;
+  width: 177vw;
+  top: 153vh;
+  z-index: 8;
+  right: -26vw;
+} 
+
+
+
+.sec-7 {
+  width: 100vw;
+  height: 250vh;
+  display: flex;
+  justify-content: center;
+  background-size: cover;
+  background-color: #c2d7ce;
+}
+
+.sec-7 .container{
+  height: 250vh;
+}
+
+.sec-7 .container #text-1{
+  position: absolute;
+  width: 67vw;
+  top: 1vh;
+  right: 17vw;
+  z-index: 22;
+  text-align: center;
+}
+
+.sec-7 .container #text-1 .translate{
+  text-align: center;
+}
+
+.sec-7 .container #text-2{
+  position: absolute;
+  width: 34vw;
+  top: 163vh;
+  right: 50vw;
+  z-index: 22;
+}
+
+.sec-7  .container #blobs-5{
+  position: absolute;
+  width: 65vw;
+  top: 111vh;
+  z-index: 6;
+  right: 46vw;
+} 
+
+.sec-7  .container #gurl-3{
+  position: absolute;
+  width: 67vw;
+  top: 84vh;
+  z-index: 5;
+  right: 27vw;
+} 
+
+.sec-7  .container #path-5{
+  position: absolute;
+  width: 146vw;
+  top: 131vh;
+  z-index: 8;
+  right: -5vw;
+} 
+
+.sec-7  .container #boy-3{
+  position: absolute;
+  width: 56vw;
+  top: 111vh;
+  z-index: 7;
+  right: 0vw;
+}
+
+.sec-7  .container #path-6{
+  position: absolute;
+  width: 151vw;
+  top: 110vh;
+  z-index: 6;
+  right: -36vw;
+} 
+
+
+
+.sec-8 {
+  width: 100vw;
+  height: 300vh;
+  display: flex;
+  justify-content: center;
+  background-size: cover;
+  background-color: #c2d7ce;
+}
+
+.sec-8 .container{
+  height: 300vh;
+}
+
+.sec-8 .container #text-1{
+  position: absolute;
+  width: 67vw;
+  top: 19vh;
+  right: 16vw;
+  z-index: 22;
+  text-align: center;
+}
+
+.sec-8 .container #text-1 .translate{
+  text-align: center;
+}
+
+.sec-8 .container #text-2{
+  position: absolute;
+  width: 41vw;
+  top: 82vh;
+  right: 49vw;
+  z-index: 22;
+}
+
+.sec-8 .container #text-3{
+  position: absolute;
+  width: 41vw;
+  top: 263vh;
+  right: 32vw;
+  z-index: 22;
+  text-align: center;
+}
+
+.sec-8 .container #text-3 .translate{
+  text-align: center;
+}
+
+.sec-8  .container #blobs-6{
+  position: absolute;
+  width: 78vw;
+  top: 96vh;
+  z-index: 6;
+  right: 8vw;
+} 
+
+.sec-8  .container #blobs-7{
+  position: absolute;
+  width: 70vw;
+  top: 128vh;
+  z-index: 8;
+  right: 24vw;
+  rotate: 90deg;
+}
+
+
+.sec-8  .container #path-8{
+  position: absolute;
+  width: 160vw;
+  top: 121vh;
+  z-index: 8;
+  right: -26vw;
+} 
+
+.sec-8  .container #journey-4{
+  position: absolute;
+  width: 95vw;
+  top: 100vh;
+  z-index: 7;
+  right: 0vw;
+}
+
+
+.sec-9 {
+  width: 100vw;
+  height: 200vh;
+  display: flex;
+  justify-content: center;
+  background-size: cover;
+  background-color: #c2d7ce;
+}
+
+.sec-9 .container{
+  height: 200vh;
+}
+
+.sec-9 .container #text-1{
+  position: absolute;
+  width: 67vw;
+  top: 66vh;
+  right: 17vw;
+  z-index: 22;
+  text-align: center;
+}
+
+.sec-9 .container #text-1 .translate{
+  text-align: center;
+}
+
+
+.sec-9  .container #blobs-7{
+  position: absolute;
+  width: 70vw;
+  top: 107vh;
+  z-index: 8;
+  right: -9vw;
+  rotate: 90deg;
+} 
+
+.sec-9  .container #blobs-8{
+  position: absolute;
+  width: 67vw;
+  top: 84vh;
+  z-index: 4;
+  right: 53vw;
+} 
+
+.sec-9  .container #path-9{
+  position: absolute;
+  width: 171vw;
+  top: 102vh;
+  z-index: 8;
+  right: -23vw;
+} 
+
+.sec-9  .container #journey-5{
+  position: absolute;
+  width: 87vw;
+  top: 81vh;
+  z-index: 7;
+  right: 8vw;
+}
+
+.sec-10 {
+  width: 100vw;
+  height: 300vh;
+  display: flex;
+  justify-content: center;
+  background-size: cover;
+  background-color: #c2d7ce;
+}
+
+.sec-10 .container{
+  height: 350vh;
+}
+
+.sec-10 #text-1{ 
+  padding-top: 5vw;
+  width: 100vw;
+  justify-content: center;
+  align-items: center ;
+  display: flex;
+  flex-direction: column;
+}
+
+.sec-10 #text-1 p{ 
+  font-family: kanit;
+  font-size: .8em;
+  font-weight: 300;
+  line-height: 2em;
+  color: #000000;
+  width: 80vw;
+  text-align: center;
+}
+
+.sec-10 #text-1 h1{ 
+  font-family: Abril Fatface;
+  font-size: 2em;
+  font-weight: 50;
+  line-height: 1em;
+  color: #c64777;
+  margin: 0;
+  padding-top:5vw;
+  text-align: center;
+  width: 60vw;
+}
+
+.sec-10 #text-1 h2{ 
+  font-family: "Playwrite AU NSW", cursive;
+  font-size: .9em;
+  font-weight: 100;
+  line-height: 1em;
+  color: #c64777;
+  margin: 0;
+  padding-top: 5vw;
+  padding-bottom: 5vw;
+}
+
+
+.sec-10 .container #text-2{
+  position: absolute;
+  width: 67vw;
+  bottom: 98vh;
+  right: 28vw;
+  z-index: 22;
+  text-align: center;
+  font-family: Abril Fatface;
+  font-size: 1.5em;
+  line-height: 1em;
+  color: #c64777;
+}
+.sec-10 .container #text-3{
+  position: absolute;
+  width: 103vw;
+  bottom: 94vh;
+  right: 24vw;
+  z-index: 22;
+  text-align: center;
+  font-family: Abril Fatface;
+  font-size: 1.5em;
+  line-height: 1em;
+  color: #c64777;
+}
+.sec-10 .container #text-4{
+  position: absolute;
+  width: 67vw;
+  bottom: 99vh;
+  right: 25vw;
+  z-index: 22;
+  text-align: center;
+  font-family: "Playwrite AU NSW", cursive;
+  font-size: .9em;
+  font-weight: 50;
+  line-height: 1em;
+  color: #c64777;
+}
+
+
+.sec-10  .container #path-10{
+  position: absolute;
+  width: 55vw;
+  top: 61vh;
+  z-index: 9;
+  right: 51vw;
+} 
+
+.sec-10  .container #path-11{
+  position: absolute;
+  width: 116vw;
+  top: 90vh;
+  z-index: 8;
+  right: -8vw;
+} 
+
+.sec-10  .container #journey-6{
+  position: absolute;
+  width: 165vw;
+  top: 180vh;
+  z-index: 9;
+  right: -34vw;
+} 
+
+
+.sec-10  .container #path-12{
+  position: absolute;
+  width: 153vw;
+  top: 229vh;
+  z-index: 8;
+  right: -33vw;
+} 
+
+
+.sec-11 {
+  width: 100vw;
+  height: 200vh;
+  display: flex;
+  justify-content: center;
+  background-size: cover;
+  background-color: #dfcde5;
+}
+
+.sec-11 .container{
+  height: 200vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: start;
+  align-items: center;
+}
+.sec-11  .container #path-11{
+  position: absolute;
+  width: 67vw;
+  top: 9vh;
+  z-index: 8;
+  right: 39vw;
+} 
+
+.wedding {
+  margin-top: 30vh;
+  z-index: 22;
+  text-align: center;
+} 
+
+
+.wedding h2{
+  font-family: "Playwrite AU NSW", cursive;
+  font-size: 1.5em;
+  font-weight: 100;
+  line-height: 1em;
+  color: #c64777;
+  margin: 0;
+  margin: 50px 0;
+  width: 80vw;
+  line-height: 1.5em;
+} 
+
+.wedding p{
+  font-family: kanit;
+  font-size: .8em;
+  font-weight: 300;
+  line-height: 2em;
+  color: #000000;
+  width: 80vw;
+  text-align: center;
+} 
+
+.wedding h1{
+  z-index: 22;
+  font-family: Abril Fatface;
+  font-size: 4em;
+  font-weight: 50;
+  line-height: 1em;
+  width: 80vw;
+  color: #c64777;
+  margin: 50px 0;
+  
+} 
+
+a:active
+{
+  color: #df9bb5;
+  font-style: normal;
+  text-decoration: none;
+} 
+
+a
+{
+  color: #6d2742;
+  font-style: normal;
+  text-decoration: none;
+} 
+a:visited
+{
+  color: #c64777;
+  font-style: normal;
+  
+} 
+.wedding img{
+ width: 60vw;
+ height: 60vw;
+ margin: 0;
+ padding: 0;
+ padding-bottom: 50px;
+} 
+
+.end{
+  position: absolute;
+  bottom: 5vw;  
+  font-size: .9rem;
+} 
