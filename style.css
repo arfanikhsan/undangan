@@ -1065,6 +1065,48 @@ height: 200vh;
   padding-bottom: 5vw;
 }
 
+
+.sec-10 .container #text-2{
+  position: absolute;
+  width: 67vw;
+  bottom: 95vh;
+  right: 49vw;
+  z-index: 22;
+  text-align: center;
+  font-family: Abril Fatface;
+  font-size: 2em;
+  font-weight: 50;
+  line-height: 1em;
+  color: #302447;
+}
+.sec-10 .container #text-3{
+  position: absolute;
+  width: 103vw;
+  bottom: 90vh;
+  right: 24vw;
+  z-index: 22;
+  text-align: center;
+  font-family: Abril Fatface;
+  font-size: 2em;
+  font-weight: 50;
+  line-height: 1em;
+  color: #302447;
+}
+.sec-10 .container #text-4{
+  position: absolute;
+  width: 67vw;
+  bottom: 99vh;
+  right: 25vw;
+  z-index: 22;
+  text-align: center;
+  font-family: "Playwrite AU NSW", cursive;
+  font-size: .9em;
+  font-weight: 50;
+  line-height: 1em;
+  color: #c64777;
+}
+
+
 .sec-10  .container #path-10{
   position: absolute;
   width: 55vw;
