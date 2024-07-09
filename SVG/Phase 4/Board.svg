@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_2" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 792.95 308.53">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #71a8ba;
+        font-family: InkFree, 'Ink Free';
+        font-size: 60px;
+      }
+
+      .cls-2 {
+        fill: #537aa1;
+        stroke-width: 0px;
+      }
+    </style>
+  </defs>
+  <g id="BG">
+    <rect class="cls-2" x="0" y="0" width="688.5" height="308.53" rx="30.1" ry="30.1"/>
+    <text class="cls-1" transform="translate(52.37 130.35)"><tspan x="0" y="0">Kelas7(1) -- Kelas 9(1)</tspan></text>
+  </g>
+</svg>
