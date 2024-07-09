@@ -257,14 +257,14 @@ height: 200vh;
   position: absolute;
   width: 58vw;
   top: 62vh;
-  z-index: 5;
+  z-index: 12;
   left: 26vw;
 }
 
 
 .sec-2 {
   width: 100vw;
-  height: 135vh;
+  height: 134vh;
   display: flex;
   justify-content: center;
   background: rgb(107,163,173);
@@ -446,9 +446,9 @@ height: 200vh;
 
 .sec-3  .container #blob-5{
   position: absolute;
-  width:40vw;
-  left: 25vw;
-  top: 1vh;
+  width: 37vw;
+  left: 7vw;
+  top: 0vh;
 }
 
 .sec-3  .container #blob-6{
