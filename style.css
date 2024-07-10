@@ -53,6 +53,7 @@ body, html {
 }
 
 .undangan-nama h1{
+    font: Abril Fatface;
     color: #cd1e49;
     margin: 0;
     font-size: 1.2rem;
