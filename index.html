@@ -21,8 +21,6 @@
     #lightbox.visible{ display:flex; opacity:1; transform:translate(-50%,-50%) scale(1); pointer-events:auto }
     #lightbox img{ width:100%; height:auto; max-height:60vh; display:block; border-radius:0; box-shadow:0 18px 70px rgba(0,0,0,.28) }
     #lightCaption{ margin-top:10px; text-align:center; color:#444; font-size:13px; line-height:1.5; width:100% }
-    .corner{ position:fixed; top:12px; right:12px; font-size:12px; color:#888 }
-    #testBadge{ position:fixed; top:12px; left:12px; font:12px/1.2 system-ui; background:#eef7ee; color:#145a1e; border:1px solid #bfe3c2; padding:6px 8px; border-radius:10px }
     /* Phase (minimal) */
     #phaseBar{ position:fixed; left:50%; top:64px; bottom:auto; transform:translateX(-50%); width:min(720px,68vw); border:none; border-radius:0; padding:0; background:transparent; color:#4f4f4f; z-index:9; box-shadow:none }
     #phaseTitle{ font-weight:300; color:#555; margin-bottom:8px; text-align:center; letter-spacing:.02em; font-size:12px }
@@ -73,8 +71,6 @@
   </div>
   <div id="copyright">© Arfan Ikhsan 2025</div>
   <div id="hint">Hover a photo to pause • Move off to resume • On mobile, press & hold to pause</div>
-  <div class="corner">Three.js</div>
-  <div id="testBadge">Running tests…</div>
 
   <script type="module">
     import * as THREE from 'three';
@@ -602,102 +598,6 @@
       if(hits.length) openLightboxForMesh(hits[0].object);
     });
 
-    // ---- Minimal self-tests ----------------------------------------------
-    (function runTests(){
-      const tests = [];
-      const ok = (name, cond) => tests.push({name, pass: !!cond});
-
-      ok('THREE loaded', !!THREE && !!THREE.WebGLRenderer);
-      ok('OrbitControls available', !!OrbitControls);
-      ok('Cards created equals images', carousel.children.length === IMAGE_URLS.length);
-      ok('Zoom enabled for background', controls.enableZoom === true);
-      ok('Controls target is ring center', controls.target.distanceTo(new THREE.Vector3(0,0,0)) === 0);
-
-      // New UI present
-      ok('Gate overlay exists', !!document.getElementById('gate'));
-      ok('Hero exists', !!document.getElementById('hero'));
-      ok('Phase bar exists', !!document.getElementById('phaseBar'));
-      ok('Copyright label exists', !!document.getElementById('copyright'));
-
-      ok('Clock is instance of THREE.Clock', clock instanceof THREE.Clock);
-
-      const prevVel = spinVel; applyFling(800);
-      ok('Fling increases spinVel', spinVel > prevVel);
-
-      const center = new THREE.Vector3(0,0,0);
-      let checks = 0; let widthPass = 0; let uprightPass = 0;
-      for(let i=0;i<Math.min(5, carousel.children.length); i++){
-        const m = carousel.children[i];
-        const xAxis = new THREE.Vector3(1,0,0).applyQuaternion(m.quaternion).normalize();
-        const up = new THREE.Vector3(0,1,0).applyQuaternion(m.quaternion).normalize();
-        const toCenter = center.clone().sub(m.position).normalize();
-        const dot = xAxis.dot(toCenter);
-        checks++; if(dot > 0.98) widthPass++;
-        if(Math.abs(up.y) > 0.98) uprightPass++;
-      }
-      ok('Plane width points inward (~5 samples)', widthPass === checks);
-      ok('Planes are upright (no pitch) (~5 samples)', uprightPass === checks);
-
-      const prevFrozen2 = isFrozen; setHovered(carousel.children[0]);
-      ok('Hover sets frozen', isFrozen === true);
-      setHovered(null);
-      ok('Unhover clears frozen', isFrozen === false);
-      if(prevFrozen2 !== undefined) { }
-
-      setHovered(carousel.children[0]);
-      const sat0 = carousel.children[0].material.uniforms.uSaturation.value;
-      const lift0 = carousel.children[0].material.uniforms.uLift.value;
-      const sat1 = carousel.children[1].material.uniforms.uSaturation.value;
-      const lift1 = carousel.children[1].material.uniforms.uLift.value;
-      ok('Hovered image is colored (sat≈1)', Math.abs(sat0 - 1) < 1e-6);
-      ok('Hovered image not lifted (lift≈0)', Math.abs(lift0 - 0) < 1e-6);
-      ok('Neighbor is grayscale (sat≈0)', sat1 < 0.01);
-      ok('Neighbor is lifted toward white', Math.abs(lift1 - CONFIG.grayLift) < 1e-6);
-      setHovered(null);
-      const allColor = carousel.children.every(c => Math.abs(c.material.uniforms.uSaturation.value - 1) < 1e-6);
-      const allNoLift = carousel.children.every(c => Math.abs(c.material.uniforms.uLift.value - 0) < 1e-6);
-      ok('All images return to color on unhover', allColor);
-      ok('All images lift cleared on unhover', allNoLift);
-
-      function startHoldForTest(){ if(!draggingSpin){ holdActive=true; isFrozen=true; } }
-      function endHoldForTest(){ holdActive=false; isFrozen=false; }
-      startHoldForTest(); ok('Mobile hold sets frozen', isFrozen === true);
-      endHoldForTest(); ok('Mobile hold release clears frozen', isFrozen === false);
-
-      applyScaleField(0);
-      const s0 = carousel.children[0].scale.x;
-      const s1 = carousel.children[1].scale.x;
-      const sFar = carousel.children[Math.floor(N/2)].scale.x;
-      ok('Focused scale equals CONFIG.focusScale', Math.abs(s0 - CONFIG.focusScale) < 1e-6);
-      ok('First neighbor ≤ focus (instant)', s1 <= s0 + 1e-6);
-      ok('First neighbor ≥ base (instant)', s1 >= 1 - 1e-6);
-      ok('Far images return to base scale', Math.abs(sFar - 1) < 1e-6);
-
-      applyScaleFieldSmooth(0);
-      const t0 = carousel.children[0].userData.targetScale;
-      const t1 = carousel.children[1].userData.targetScale;
-      const tFar = carousel.children[Math.floor(N/2)].userData.targetScale;
-      ok('Target scale set for focus', Math.abs(t0 - CONFIG.focusScale) < 1e-6);
-      ok('Smooth neighbor ≤ focus', t1 <= t0 + 1e-6 && t1 >= 1 - 1e-6);
-      const t2 = carousel.children[2].userData.targetScale;
-      ok('Smooth falloff near center is monotonic', t0 >= t1 && t1 >= t2);
-      ok('Target scale for far returns to 1', Math.abs(tFar - 1) < 1e-6);
-      const affected = carousel.children.filter(c => (c.userData.targetScale||1) > 1.0001).length;
-      const minAffected = Math.min(N, 2*CONFIG.influenceNeighbors + 1);
-      ok('Smooth field affects at least 2R+1 images', affected >= minAffected);
-
-      (function(){
-        const mtest = carousel.children[0];
-        mtest.scale.setScalar(1);
-        mtest.userData.targetScale = 2;
-        const dtSim = 0.016;
-        const t = Math.min(1, CONFIG.scaleLerp * dtSim);
-        const expected = 1 + (2 - 1) * t;
-        const curr = mtest.scale.x;
-        const next = curr + (mtest.userData.targetScale - curr) * t;
-        mtest.scale.setScalar(next);
-        ok('Easing step moves toward target', Math.abs(mtest.scale.x - expected) < 1e-6);
-      })();
 
       (function(){
         const mtest = carousel.children[0];
