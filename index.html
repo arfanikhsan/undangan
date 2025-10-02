@@ -3,58 +3,111 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>The Carousel Journey</title>
-
-  <!-- Fonts: Open Sans Light everywhere -->
+  <title>GMM — Be The Witness</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300&display=swap" rel="stylesheet">
-
-  <link rel="stylesheet" href="./styles.css" />
-
-  <!-- ESM import map for Three.js -->
-  <script type="importmap">
-  {
-    "imports": {
-      "three": "https://unpkg.com/three@0.161.0/build/three.module.js",
-      "three/addons/": "https://unpkg.com/three@0.161.0/examples/jsm/"
-    }
-  }
-  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <!-- Gate / Loader -->
-  <div id="gate" role="button" aria-label="Click to open">
-    <div class="to">To : <b>Arfan Ikhsan</b></div>
-    <div class="cta">Click to open</div>
+  <!-- HOME / INTRO -->
+  <div class="poster" id="home">
+    <!-- Header / wordmark -->
+    <header class="branding">
+      <span class="logo">GMM</span>
+      <span class="meta">GAMALIEL&nbsp;&nbsp;MAYASTI&nbsp;&nbsp;2026</span>
+    </header>
+
+    <!-- Visual: two gradient spheres with rotating arced captions -->
+    <section class="orbs">
+      <!-- Left orb -->
+       <a href="landing.html" class="btn-link" data-page="witness">
+      <svg class="orb" viewBox="0 0 300 300" aria-label="Be the Witness">
+        <defs>
+          <radialGradient id="warmOrb" cx="35%" cy="30%" r="65%">
+            <stop offset="0%"  stop-color="#ffffff" stop-opacity="0.95"/>
+            <stop offset="35%" stop-color="#f5f1e8"/>
+            <stop offset="65%" stop-color="#caa987"/>
+            <stop offset="85%" stop-color="#a45a44"/>
+            <stop offset="100%" stop-color="#6e2d22"/>
+          </radialGradient>
+          <radialGradient id="warmShadow" cx="70%" cy="75%" r="65%">
+            <stop offset="60%" stop-color="rgba(0,0,0,0)" />
+            <stop offset="100%" stop-color="rgba(0,0,0,0.18)"/>
+          </radialGradient>
+          <!-- path exactly on the orb radius (r=120) -->
+          <path id="arcLeft" d="M 150 30 A 120 120 0 1 1 149.999 30" />
+        </defs>
+        <circle cx="150" cy="150" r="120" fill="url(#warmOrb)"/>
+        <circle cx="150" cy="150" r="120" fill="url(#warmShadow)"/>
+        <g class="arc-rotor btn-link" data-page="witness">
+          <text class="arc-text">
+            <textPath href="#arcLeft" startOffset="50%" text-anchor="middle" dy="-2">BE THE WITNESS</textPath>
+          </text>
+          <animateTransform attributeName="transform" type="rotate" from="0 150 150" to="360 150 150" dur="36s" repeatCount="indefinite" />
+        </g>
+      </svg></a>
+
+      <!-- Right orb --><a href="home.html" class="btn-link" data-page="witness">
+      <svg class="orb" viewBox="0 0 300 300" aria-label="Journey of Us">
+        <defs>
+          <radialGradient id="coolOrb" cx="40%" cy="30%" r="65%">
+            <stop offset="0%"  stop-color="#ffffff" stop-opacity="0.95"/>
+            <stop offset="35%" stop-color="#f6f3e8"/>
+            <stop offset="65%" stop-color="#d7cf9f"/>
+            <stop offset="85%" stop-color="#bfb374"/>
+            <stop offset="100%" stop-color="#9d9154"/>
+          </radialGradient>
+          <radialGradient id="coolShadow" cx="72%" cy="78%" r="65%">
+            <stop offset="60%" stop-color="rgba(0,0,0,0)"/>
+            <stop offset="100%" stop-color="rgba(0,0,0,0.18)"/>
+          </radialGradient>
+          <!-- same radius as orb -->
+          <path id="arcRight" d="M 150 30 A 120 120 0 1 1 149.999 30" />
+        </defs>
+        <circle cx="150" cy="150" r="120" fill="url(#coolOrb)"/>
+        <circle cx="150" cy="150" r="120" fill="url(#coolShadow)"/>
+        <g class="arc-rotor">
+          <text class="arc-text">
+            <textPath href="#arcRight" startOffset="50%" text-anchor="middle" dy="-2">JOURNEY OF US</textPath>
+          </text>
+          <animateTransform attributeName="transform" type="rotate" from="360 150 150" to="0 150 150" dur="36s" repeatCount="indefinite" />
+        </g>
+      </svg></a>
+    </section>
   </div>
 
-  <!-- Top heading -->
-  <div id="hero">
-    <h1>THE CAROUSEL JOURNEY</h1>
-    <h2>The wedding of Gama and Asti</h2>
-  </div>
+  <!-- WITNESS DETAIL PAGE -->
+  <section class="detail hidden" id="witness">
+    <header class="branding">
+      <span class="logo">GMM</span>
+      <span class="meta">GAMALIEL&nbsp;&nbsp;MAYASTI&nbsp;&nbsp;2026</span>
+    </header>
 
-  <!-- Canvas mount -->
-  <div id="app"></div>
+    <div class="layout">
+      <div class="burst tr"></div>
 
-  <!-- Phase (auto-positioned between ring bottom and footer top) -->
-  <div id="phaseBar">
-    <div id="phaseTitle">Phase 1</div>
-    <div id="phaseText">Loading…</div>
-  </div>
+      <div class="hero hero--top">
+        <div class="ph"></div>
+        <div class="copy">
+          <h2><span class="accent">GAMALIEL</span><br>BHAROTO ADI</h2>
+          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+        </div>
+      </div>
 
-  <!-- Lightbox -->
-  <div id="fadeOverlay" aria-hidden="true"></div>
-  <div id="lightbox" aria-live="polite">
-    <img id="lightImg" alt="Selected photo" />
-    <div id="lightCaption"></div>
-  </div>
+      <div class="hero hero--bottom">
+        <div class="copy">
+          <h2><span class="accent">MAYASTI</span><br>DIWDYA NASTITI</h2>
+          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+        </div>
+        <div class="ph"></div>
+      </div>
 
-  <!-- Footer bits -->
-  <div id="copyright">© Arfan Ikhsan 2025</div>
-  <div id="hint"> </div>
+      <div class="burst bl"></div>
+    </div>
 
-  <script type="module" src="./app.js"></script>
+    <a href="#" class="back" data-nav="home">← Back</a>
+  </section>
+
+  <script src="script.js"></script>
 </body>
 </html>
