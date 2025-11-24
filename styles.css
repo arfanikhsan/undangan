@@ -6,9 +6,9 @@ canvas { touch-action: none; }
 @font-face {
   font-family: 'DMMono-Light';
   font-style: normal;
-  font-weight: 100;
+  font-weight: 300;
   src:
-  url('https://github.com/arfanikhsan/undangan/blob/main/assets/fonts/BaiJamjuree-Light.woff2') format('woff2'),
+  url('https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&display=swap'),
   url('assets/fonts/DMMono-Light.woff2') format('woff2'),
   url('assets/fonts/DMMono-Light.woff') format('woff'),
   url('assets/fonts/DMMono-Light.ttf') format('truetype');
@@ -83,7 +83,10 @@ html, body {
   h1{
     margin: 0;
     font-size: 1rem;
-    font-family: 'DMMono-Light', monospace;
+    font-family: "DM Mono", monospace;
+    font-weight: 300;
+    font-style: normal;
+    
   }
 }
 /* Centered content */
@@ -312,6 +315,7 @@ transform: translate(0, 0);
 canvas {
   touch-action: none;        /* keeps mobile gestures from hijacking pointers */
 }
+
 
 
 
