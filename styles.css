@@ -9,6 +9,7 @@ canvas { touch-action: none; }
   font-weight: 100;
   src: url('assets/fonts/DMMono-Light.woff2') format('woff2');
   src: url('assets/fonts/DMMono-Light.woff') format('woff');
+  url('assets/fonts/DMMono-Light.ttf') format('truetype');
   font-display: swap;
 }
 
@@ -309,6 +310,7 @@ transform: translate(0, 0);
 canvas {
   touch-action: none;        /* keeps mobile gestures from hijacking pointers */
 }
+
 
 
 
