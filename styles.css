@@ -8,6 +8,7 @@ canvas { touch-action: none; }
   font-style: normal;
   font-weight: 100;
   src: url('assets/fonts/DMMono-Light.woff2') format('woff2');
+  src: url('assets/fonts/DMMono-Light.woff') format('woff');
   font-display: swap;
 }
 
@@ -16,6 +17,7 @@ canvas { touch-action: none; }
   font-style: normal;
   font-weight: 400;
   src: url('assets/fonts/DMMono-Regular.woff2') format('woff2');
+  src: url('assets/fonts/DMMono-Regular.woff') format('woff');
   font-display: swap;
 }
 
@@ -25,6 +27,7 @@ canvas { touch-action: none; }
   font-style: normal;
   font-weight: 300;
   src: url('assets/fonts/BaiJamjuree-Light.woff2') format('woff2');
+  src: url('assets/fonts/BaiJamjuree-Light.woff') format('woff');
   font-display: swap;
 }
 
@@ -33,6 +36,7 @@ canvas { touch-action: none; }
   font-style: normal;
   font-weight: 400;
   src: url('assets/fonts/BaiJamjuree-Regular.woff2') format('woff2');
+  src: url('assets/fonts/BaiJamjuree-Regular.woff') format('woff');
   font-display: swap;
 }
 
@@ -42,6 +46,7 @@ canvas { touch-action: none; }
   font-style: normal;
   font-weight: 400;
   src: url('assets/fonts/ATYPE-2B.woff2') format('woff2'); /* or 'ATYPE 2B.woff2' with quotes */
+  src: url('assets/fonts/ATYPE-2B.woff') format('woff'); 
   font-display: swap;
 }
 
@@ -304,4 +309,5 @@ transform: translate(0, 0);
 canvas {
   touch-action: none;        /* keeps mobile gestures from hijacking pointers */
 }
+
 
