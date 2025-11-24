@@ -35,6 +35,7 @@ renderer.outputColorSpace = THREE.SRGBColorSpace; // ensures colors look correct
 // SCENE + CAMERA
 const scene  = new THREE.Scene(); // create a scene to hold all our 3D objects
 const camera = new THREE.PerspectiveCamera(65, canvasWidth/canvasHeight, 0.1, 200); // fov, aspect, near clipping, far clipping
+camera.position.set(0, 10, 0); // move the camera Z units back on Z so we can view the scene
 window.addEventListener("resize", onResize);
 onResize(); 
 
