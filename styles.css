@@ -8,7 +8,6 @@ canvas { touch-action: none; }
   font-style: normal;
   font-weight: 300;
   src:
-  url('https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&display=swap'),
   url('assets/fonts/DMMono-Light.woff2') format('woff2'),
   url('assets/fonts/DMMono-Light.woff') format('woff'),
   url('assets/fonts/DMMono-Light.ttf') format('truetype');
@@ -84,7 +83,7 @@ html, body {
 #overlay h1{
   margin: 0;
   font-size: 1rem;
-  font-family: "DM Mono", monospace;
+  font-family: "DMMono-Light", monospace;
   font-weight: 300;
   font-style: normal;
 }
@@ -191,11 +190,13 @@ html, body {
   width: 100%;
   margin: 0;
   padding: 0 0 1rem 0;
-  h1{
+}
+
+.overlay-inner .container-3 .wellcome-text h1{
     padding-top: .5rem;
     color: #fff8e8;
-  }
 }
+
 /*helper classes for loader open button*/
 #open-btn{
   background-color:rgb(209, 88, 90);
@@ -314,6 +315,7 @@ transform: translate(0, 0);
 canvas {
   touch-action: none;        /* keeps mobile gestures from hijacking pointers */
 }
+
 
 
 
