@@ -8,6 +8,7 @@ canvas { touch-action: none; }
   font-style: normal;
   font-weight: 100;
   src:
+  url('https://github.com/arfanikhsan/undangan/blob/main/assets/fonts/BaiJamjuree-Light.woff2') format('woff2'),
   url('assets/fonts/DMMono-Light.woff2') format('woff2'),
   url('assets/fonts/DMMono-Light.woff') format('woff'),
   url('assets/fonts/DMMono-Light.ttf') format('truetype');
@@ -311,6 +312,7 @@ transform: translate(0, 0);
 canvas {
   touch-action: none;        /* keeps mobile gestures from hijacking pointers */
 }
+
 
 
 
