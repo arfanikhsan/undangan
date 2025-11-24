@@ -80,7 +80,7 @@ html, body {
   h1{
     margin: 0;
     font-size: 1rem;
-    font-family: 'DMMono-light', monospace;
+    font-family: 'DMMono-Light', monospace;
   }
 }
 /* Centered content */
@@ -309,5 +309,6 @@ transform: translate(0, 0);
 canvas {
   touch-action: none;        /* keeps mobile gestures from hijacking pointers */
 }
+
 
 
