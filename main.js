@@ -49,22 +49,26 @@ scene.add(carousell);
 
 
 //Finding front card
-function getFrontFacingCard(cardMeshes, camera) {
-  if (!cardMeshes || cardMeshes.length === 0) return null;
+function getFrontFacingCard(cards, camera) {
+  if (!cards || cards.length === 0) return null;
 
   const camDir = new THREE.Vector3();
-  camera.getWorldDirection(camDir);      // direction camera is looking (−Z in view space)
-  camDir.negate();                       // we want “towards camera” direction
+  camera.getWorldDirection(camDir);
+  camDir.negate(); // direction *towards* camera
+
+  const localNormal = new THREE.Vector3(0, 0, 1); // card front in local space
+  const worldNormal = new THREE.Vector3();
+  const worldQuat = new THREE.Quaternion();
 
   let bestCard = null;
   let bestDot = -Infinity;
 
-  const normal = new THREE.Vector3(0, 0, 1);   // local +Z is card “front”
-  const worldNormal = new THREE.Vector3();
+  for (const card of cards) {
+    // ✅ include parent transforms (carousel rotation)
+    card.getWorldQuaternion(worldQuat);
+    worldNormal.copy(localNormal).applyQuaternion(worldQuat);
 
-  for (const card of cardMeshes) {
-    worldNormal.copy(normal).applyQuaternion(card.quaternion);
-    const dot = worldNormal.dot(camDir);       // 1 = perfectly facing camera
+    const dot = worldNormal.dot(camDir);
 
     if (dot > bestDot) {
       bestDot = dot;
@@ -72,8 +76,7 @@ function getFrontFacingCard(cardMeshes, camera) {
     }
   }
 
-  // Optional: require a minimum alignment (avoid edge-on)
-  const ALIGN_THRESHOLD = 0.9; // cos(25°)≈0.9 – tweak if needed
+  const ALIGN_THRESHOLD = 0.9; // you can tweak
   if (bestDot < ALIGN_THRESHOLD) return null;
 
   return bestCard;
@@ -81,23 +84,61 @@ function getFrontFacingCard(cardMeshes, camera) {
 
 
 
+
 //ANIMATION LOOP
 const controls = new OrbitControls(camera, renderer.domElement);
 const clock = new THREE.Clock();
+//FOR POINTER CONTROL
+const raycaster = new THREE.Raycaster();
+const pointer = new THREE.Vector2();
+let isHoldingCard = false;   // <-- new flag
 
-//spinning animation
+//POINTER HELPER
+function updatePointerFromEvent(event) {
+  const rect = renderer.domElement.getBoundingClientRect();
+  const x = (event.clientX - rect.left) / rect.width;
+  const y = (event.clientY - rect.top) / rect.height;
+
+  pointer.x = x * 2 - 1;
+  pointer.y = -(y * 2 - 1);
+}
+
+function onPointerDown(event) {
+  updatePointerFromEvent(event);
+
+  raycaster.setFromCamera(pointer, camera);
+  const hits = raycaster.intersectObjects(cardMeshes, true);
+
+  if (hits.length > 0) {
+    // user is pressing on a card → stop spinning
+    isHoldingCard = true;
+  }
+}
+
+function onPointerUp(event) {
+  isHoldingCard = false;
+}
+
+renderer.domElement.addEventListener('pointerdown', onPointerDown);
+renderer.domElement.addEventListener('pointerup', onPointerUp);
+renderer.domElement.addEventListener('pointercancel', onPointerUp);
+renderer.domElement.addEventListener('pointerleave', onPointerUp);
+
+
+//SPINNING
 let spinImpulse = 0;      // will decay to 0
 const spinBase   = 0.002; // constant slow spin forever
 const damping    = 0.99;
 
-//camera animation
+
+//CAMERA ANIMATE
 let isCameraAnimating = false;
 let camStartTime = 0;
 let camStart = new THREE.Vector3();
 let camEnd   = new THREE.Vector3(0, 0, 9);
 const camDuration = 5000;
 
-//sound setting
+//SOUND
 //Load sound
 const tickSound = document.getElementById('tick-sound');
 //Finding facing card
@@ -105,52 +146,27 @@ const tickSound = document.getElementById('tick-sound');
 let currentFrontCard = null;
 let lastFrontCard = null;
 let lastFrontCardWasAligned = false;
+function updateFrontCardState() {
+  if (!cardMeshes || cardMeshes.length === 0) return;
 
-function tick(){
-  const dt = clock.getDelta();
-
-  // CAMERA ANIMATION
-  if (isCameraAnimating) {
-  const now = Date.now();
-  const elapsed = now - camStartTime;
-  const t = Math.min(elapsed / camDuration, 1);
-
-  const easing = 1 - Math.pow(1 - t, 3);
-
-  // interpolate smoothly from camStart → camEnd
-  camera.position.lerpVectors(camStart, camEnd, easing);
-
-  if (t === 1) {
-    isCameraAnimating = false;
-    }
-  }
-
-  const spin = spinBase + spinImpulse;
-  carousell.rotation.y += spin;
-  spinImpulse *= damping;     // decays the impulse
-
-  controls.update(); 
-  renderer.render(scene, camera); 
-
-  //Facing Card finder
+  // Facing Card finder
   const frontCard = getFrontFacingCard(cardMeshes, camera);
   currentFrontCard = frontCard;
 
-  // Simple sanity check: log when we detect a front card
-  // (you can comment this out once you're happy)
-  if (frontCard && frontCard !== lastFrontCard) {
-    console.log('New front card:', frontCard.name || frontCard.id);
+  // caption handling
+  if (frontCard !== lastFrontCard) {
+    const captionText = getCaptionForCard(frontCard);
+    showCaption(captionText);
   }
 
   // Decide when to play the tick sound
   if (frontCard) {
     // Only tick when it *becomes* nicely aligned
     if (!lastFrontCardWasAligned || frontCard !== lastFrontCard) {
-      // rewind and play quietly
       tickSound.currentTime = 0;
-      tickSound.volume = 0.2; // “micro sized” – tweak volume here
+      tickSound.volume = 0.2;
       tickSound.play().catch(() => {
-        // ignore if browser blocks autoplay; it will start working after user interaction
+        // ignore autoplay block
       });
 
       lastFrontCardWasAligned = true;
@@ -161,10 +177,67 @@ function tick(){
   }
 
   lastFrontCard = frontCard;
-
-
-  requestAnimationFrame(tick); 
 }
+
+
+//CAPTION SETTING
+const captionEl = document.getElementById('card-caption');
+function getCaptionForCard(card) {
+  if (!card || card.userData.cardIndex === undefined) return '';
+
+  const idx = card.userData.cardIndex; // 0-based index
+
+  if (idx >= 6 && idx <=9) return "Mayasti’s biography";
+  // fallback for others
+  return '';
+}
+function showCaption(text) {
+  if (!captionEl) return;
+  if (!text) {
+    captionEl.classList.remove('visible');
+    captionEl.textContent = '';
+  } else {
+    captionEl.textContent = text;
+    captionEl.classList.add('visible');
+  }
+}
+
+
+
+function tick() {
+  requestAnimationFrame(tick);
+
+  const dt = clock.getDelta();
+
+  // CAMERA ANIMATION
+  if (isCameraAnimating) {
+    const now = Date.now();
+    const elapsed = now - camStartTime;
+    const t = Math.min(elapsed / camDuration, 1);
+
+    const easing = 1 - Math.pow(1 - t, 3);
+
+    // interpolate smoothly from camStart → camEnd
+    camera.position.lerpVectors(camStart, camEnd, easing);
+
+    if (t === 1) {
+      isCameraAnimating = false;
+    }
+  }
+
+  if (!isHoldingCard) {
+    const spin = spinBase + spinImpulse;
+    carousell.rotation.y += spin;
+    spinImpulse *= damping;
+  }
+  controls.update();
+
+  // all the front-card / caption / tick sound logic in one place:
+  updateFrontCardState();
+
+  renderer.render(scene, camera);
+}
+
 tick();
 
 // Setting up the scene lights for step 5 
@@ -331,6 +404,8 @@ imgURLs.forEach((url, i) => {
     card.position.set(x, 0, z);
     card.lookAt(0, 0, 0);
     card.rotateY(Math.PI * 0.5);
+
+    card.userData.cardIndex = i; // <— remember which card this is
 
     // Add to carousell
     carousell.add(card);
