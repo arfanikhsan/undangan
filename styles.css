@@ -79,16 +79,16 @@ html, body {
   flex-direction: column;
   color: var(--fg);
   transition: transform 1s ease;
-
-  h1{
-    margin: 0;
-    font-size: 1rem;
-    font-family: "DM Mono", monospace;
-    font-weight: 300;
-    font-style: normal;
-    
-  }
 }
+
+#overlay h1{
+  margin: 0;
+  font-size: 1rem;
+  font-family: "DM Mono", monospace;
+  font-weight: 300;
+  font-style: normal;
+}
+
 /* Centered content */
 .overlay-inner {
   display: flex;
@@ -108,16 +108,15 @@ html, body {
   margin: 0;
   padding: 0;
   text-align: center;
-  
-
-  p {
-    color:  #fff8e8;
-    margin: 0;
-    padding: 0;
-    font-family: 'DMMono-Regular', monospace;
-    font-size: .6rem;
-  }
 }
+
+.overlay-inner .container-1 p {
+  color:  #fff8e8;
+  margin: 0;
+  padding: 0;
+  font-family: 'DMMono-Regular', monospace;
+  font-size: .6rem;
+  }
 
 .overlay-inner .container-1 .upper-caption{
   display: flex;
@@ -315,6 +314,7 @@ transform: translate(0, 0);
 canvas {
   touch-action: none;        /* keeps mobile gestures from hijacking pointers */
 }
+
 
 
 
