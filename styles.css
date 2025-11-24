@@ -239,35 +239,7 @@ transform: translate(0, 0);
 /*ANIMATION*/
 
 /* Slide in captions from top */
-.container-1 img,
-.container-2 .guest-name hr{
-  opacity: 0;
-  transform: translateY(-20px);
-  animation: slideDownFade 1s ease forwards;
-}
 
-.upper-caption .block p,
-.lower-caption .block p,
-.guest-name h1,
-.wellcome-text h1 {
-  opacity: 0;
-  transform: translateY(-20px);
-  animation: slideDownFade 1s ease forwards;
-  animation-delay: 0.5s;
-}
-
-.container-3 {
-  opacity: 0;
-  animation: fadeIn 1s ease forwards;
-  animation-delay: .25s;
-}
-
-.container-3 .wellcome-text,
-#loader-status {
-  opacity: 0;
-  animation: fadeIn 1s ease forwards;
-  animation-delay: .5s;
-}
 
 /* Keyframes */
 @keyframes overlay-progress-bar {
@@ -307,6 +279,7 @@ transform: translate(0, 0);
 canvas {
   touch-action: none;        /* keeps mobile gestures from hijacking pointers */
 }
+
 
 
 
