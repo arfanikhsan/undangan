@@ -1,457 +1,241 @@
-import { OrbitControls } from "https://unpkg.com/three@0.161.0/examples/jsm/controls/OrbitControls.js";
-import * as THREE from 'three';
+import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js";
+import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.161.0/examples/jsm/controls/OrbitControls.js";
 
-//GLOBALS------------------------
-//Long press
-let heldIndex = -1; 
+// 01 - RENDERER -------------------------------------------------------------------------------------------
 
-//Vectors for front facing detection
-const _vA = new THREE.Vector3();
-const _vB = new THREE.Vector3();
+const app = document.getElementById("app"); //look for the app div
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true }); //Create engine that draws to canvas using webGL, with antialiasing and alpha for transparency
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2)); // set pixel ratio for hi-dpi screens, capped at 2 for performance
+// Set the size of the renderer to match the app div
+let canvasWidth  = app.clientWidth;
+let canvasHeight = app.clientHeight;
+renderer.setSize(canvasWidth, canvasHeight);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
 
+function onResize() {
+  canvasWidth  = app.clientWidth;
+  canvasHeight = app.clientHeight;
 
-//Pop Out Tap Helper
-let holdEngaged = false;
-
-//Create the renderer
-const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
-renderer.setSize(innerWidth, innerHeight);
-
-//pointer handler fix
-renderer.domElement.addEventListener("pointerdown", e => {
-  if (!e.isPrimary) return;
-  // ... your hold/drag start logic
-});
-renderer.domElement.addEventListener("pointermove", e => {
-  if (!e.isPrimary) return;
-  // ... your move logic
-});
-renderer.domElement.addEventListener("pointerup", e => {
-  if (!e.isPrimary) return;
-  // ... your end logic
-});
-renderer.domElement.addEventListener("pointerleave", e => {
-  if (!e.isPrimary) return;
-  // ... end logic
-});
-renderer.domElement.addEventListener("pointercancel", e => {
-  if (!e.isPrimary) return;
-  // ... end logic
-});
-
-//canvas stop triggering gesture
-renderer.domElement.style.touchAction = "none"; 
-
-//Monkey-patch the release to be safe (prevents the exception spam)
-const el = renderer.domElement;
-const nativeRelease = el.releasePointerCapture?.bind(el);
-if (nativeRelease && el.hasPointerCapture) {
-  el.releasePointerCapture = (id) => {
-    // only release if this element actually holds that id
-    if (el.hasPointerCapture(id)) nativeRelease(id);
-  };
-}
-
-
-//set an opaque clear so you can tell it’s there even before we render anything
-renderer.setClearColor(0xfefaef, 1);
-
-//Put the canvas in the page
-document.getElementById("app").appendChild(renderer.domElement);
-
-
-//Keep it sized on resize
-addEventListener("resize", () => {
-  renderer.setSize(innerWidth, innerHeight);
-});
-
-
-
-//RAYCASTER FOR HOVER -------------------------
-const raycaster = new THREE.Raycaster();
-const pointer = new THREE.Vector2();
-let hoveringPhoto = false;
-
-function setPointerFromEvent(e){
-  const r = renderer.domElement.getBoundingClientRect();
-  pointer.x = ((e.clientX - r.left)/r.width) * 2 - 1;
-  pointer.y = -((e.clientY - r.top)/r.height) * 2 + 1;
-}
-
-renderer.domElement.addEventListener("pointermove", e => {
-  setPointerFromEvent(e);
-  raycaster.setFromCamera(pointer, camera);
-  const hits = raycaster.intersectObjects(carousel.children, false);
-  hoveringPhoto = hits.length > 0;
-});
-
-renderer.domElement.addEventListener("pointerleave", () => hoveringPhoto = false);
-
-
-
-
-//TAP & HOLD HOVER HELPER -----------------------
-//Global
-let holdPaused = false;       // true only while a long-press is active
-let holdActive = false;
-let holdTimer  = 0;
-let holdX = 0, holdY = 0, holdMoved = 0;
-
-const HOLD_MS = 100;          // press duration to count as "hold"
-const HOLD_MOVE_TOL = 10;      // pixels of wiggle allowed before it's a drag
-
-//point listener
-// helpful on touch
-renderer.domElement.style.touchAction = "none";
-
-renderer.domElement.addEventListener("pointerdown", e => {
-  holdActive = true;
-  holdPaused = false;
-  holdX = e.clientX; holdY = e.clientY; holdMoved = 0;
-
-  clearTimeout(holdTimer);
-  const startX = e.clientX, startY = e.clientY;
-
-  holdTimer = setTimeout(() => {
-    if (!holdActive) return;
-    // check we’re still basically on a tile
-    const r = renderer.domElement.getBoundingClientRect();
-    const px = ((startX - r.left) / r.width) * 2 - 1;
-    const py = -((startY - r.top) / r.height) * 2 + 1;
-    pointer.set(px, py);
-    raycaster.setFromCamera(pointer, camera);
-    const hit = raycaster.intersectObjects(carousel.children, false)[0];
-
-    if (hit && holdMoved < HOLD_MOVE_TOL) {
-      holdPaused = true;      // long-press engaged
-      heldIndex = hit.object.userData.index;  // <— remember the tile when held
-      holdEngaged = true;
-      updateTargets();
-    }
-  }, HOLD_MS);
-});
-
-renderer.domElement.addEventListener("pointermove", e => {
-  if (!holdActive) return;
-  holdMoved += Math.abs(e.clientX - holdX) + Math.abs(e.clientY - holdY);
-  holdX = e.clientX; holdY = e.clientY;
-
-  // if they start dragging, cancel the hold attempt
-  if (holdMoved > HOLD_MOVE_TOL) {
-    clearTimeout(holdTimer);
-    holdPaused = false;
-  }
-});
-
-function endHold(){
-  holdActive = false;
-  clearTimeout(holdTimer);
-  holdPaused = false;         // resume on release
-  heldIndex = -1;
-  updateTargets();
-  holdEngaged = false;
-
-}
-renderer.domElement.addEventListener("pointerup", endHold);
-renderer.domElement.addEventListener("pointerleave", endHold);
-renderer.domElement.addEventListener("pointercancel", endHold);
-
-
-
-
-//2. SCENE AND CAMERA SETUP -----------------------
-// Adding Scene & persepective camera
-const scene  = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(55, innerWidth / innerHeight, 0.1, 100);
-camera.position.set(0, 3, 10);
-
-//Render loop -- Updated to part 7.Gentle Spin
-/*function tick(){
-  renderer.render(scene, camera);
-  requestAnimationFrame(tick);
-}
-tick();
-*/
-
-//Resize handler
-addEventListener("resize", () => {
-  renderer.setSize(innerWidth, innerHeight);
-  camera.aspect = innerWidth / innerHeight;
+  renderer.setSize(canvasWidth, canvasHeight);
+  camera.aspect = canvasWidth / canvasHeight;
   camera.updateProjectionMatrix();
-});
-
-
-
-
-//3. Texture Loader (Basic Photo)-----------------------
-// Texture
-const loader = new THREE.TextureLoader();
-const TARGET_ASPECT = 1.8 / 1.2; // plane width / height
-
-//Fixed Aspect Cover Texture Loader
-function loadCoverTexture(url, targetAspect = TARGET_ASPECT){
-  const tex = loader.load(url, t => {
-    const img = t.image;
-    if (!img || !img.width) return; // still loading
-
-    const a = img.width / img.height; // image aspect
-    t.wrapS = t.wrapT = THREE.ClampToEdgeWrapping;
-    t.colorSpace = THREE.SRGBColorSpace;
-    t.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
-
-    if (a >= targetAspect) {
-      // Image is wider than the tile: crop left/right
-      t.repeat.set(targetAspect / a, 1);
-      t.offset.set((1 - t.repeat.x) * 0.5, 0);
-    } else {
-      // Image is taller/narrower: crop top/bottom
-      t.repeat.set(1, a / targetAspect);
-      t.offset.set(0, (1 - t.repeat.y) * 0.5);
-    }
-
-    t.needsUpdate = true;
-  });
-  return tex;
 }
 
+app.appendChild(renderer.domElement); // add the renderer canvas to the app div
+renderer.outputColorSpace = THREE.SRGBColorSpace; // ensures colors look correct from step 5 onwards
 
 
-//4. CAMERA CONTROLS -----------------------
-//Camera Controls
+
+
+// 02 - SCENE CAMERA ANIMATION LOOP ------------------------------------------------------------------
+// Scene + camera
+const scene  = new THREE.Scene(); // create a scene to hold all our 3D objects
+const camera = new THREE.PerspectiveCamera(55, canvasWidth/canvasHeight, 0.1, 100); // fov, aspect, near clipping, far clipping
+camera.position.set(0, 0, 3); // move the camera Z units back on Z so we can view the scene
+
+// Every time the window is resized, update the renderer size and the camera aspect ratio
+window.addEventListener("resize", onResize);
+onResize(); 
+
+//Create the carousell and put it into the scene
+const carousell = new THREE.Group();
+scene.add(carousell);
+
+//Animation loop (for now)
+let spinV = 0.10;   // velocity (radians per frame-ish)
+const damping = 0.98; // 0.90 = heavy brake, 0.99 = floaty
+
 const controls = new OrbitControls(camera, renderer.domElement);
-controls.enablePan = false;      // keeps things centered; we don’t need pan
-controls.enableDamping = true;   // smooth motion
-controls.dampingFactor = 0.08;   // small but noticeable
-controls.minDistance = 3.5;      // zoom limits so you don’t lick the pixels
-controls.maxDistance = 12;
-
-//Update controls each frame
-controls.target.set(0, 0, 0);
-controls.update();
-
-
-
-//5. THE CAROUSEL -----------------------
-// Ring params
-const TILE_W = 1, TILE_H = 1;
-const RADIUS  = 3.0;
-
-// Use multiple images if you have them; duplicate the same file if you don't.
-const IMAGE_URLS = [
-  "assets/photo.png","assets/photo2.png","assets/photo.png","assets/photo.png","assets/photo.png","assets/photo2.png","assets/photo3.png","assets/photo.png","assets/photo.png","assets/photo.png2","assets/photo.png","assets/photo.png","assets/photo2.png","assets/photo2.png","assets/photo3.png","assets/photo2.png","assets/photo3.png","assets/photo.png","assets/photo3.png","assets/photo.png",];
-
-//Group to hold the tiles
-const carousel = new THREE.Group();
-scene.add(carousel);
-
-//Creating Sub-Group
-const GROUPS = 4;                              
-const N = IMAGE_URLS.length;                  
-const GROUP_SIZE = N / GROUPS;
-const CAPTIONS = Array.from({ length: GROUPS }, (_, i) => `Phase ${i+1}`);
-
-//What index is most front-facing?
-function frontTileIndex(){
-  // Return the index of the tile most front-facing
-  let bestIdx = 0, bestScore = -1e9;
-  const n = carousel.children.length;
-  for (let i = 0; i < n; i++){
-    const mesh = carousel.children[i];
-    // local angle around the ring + current carousel yaw
-    const ang = Math.atan2(mesh.position.x, mesh.position.z) + carousel.rotation.y;
-    const facing = Math.cos(ang); // 1 when directly in front
-    if (facing > bestScore){ bestScore = facing; bestIdx = i; }
-  }
-  return bestIdx;
-}
-
-let currentCaptionGroup = -1;
-
-function updateCaption(){
-  let group;
-
-  // If you're holding a tile, treat *that* group as the active caption.
-  if (holdPaused && heldIndex >= 0){
-    group = Math.floor(heldIndex / GROUP_SIZE);
-  } else {
-    const idx = frontTileIndex();
-    group = Math.floor(idx / GROUP_SIZE);
-  }
-
-  if (group !== currentCaptionGroup){
-    currentCaptionGroup = group;
-    const el = document.getElementById("groupCaption");
-    el.textContent = CAPTIONS[group] ?? `Phase ${group+1}`;
-  }
-}
-updateCaption();
-
-
-
-
-//Shared geometry for all tiles
-const tileGeo = new THREE.PlaneGeometry(TILE_W, TILE_H);
-
-//Tiny Shader for desaturation effect
-const fx = {
-  uniforms: () => ({ map: { value: null }, uSat: { value: 1.0 } }),
-  vert: /* glsl */`
-    varying vec2 vUv;
-    void main(){
-      vUv = uv;
-      gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
-    }`,
-  frag: /* glsl */`
-    uniform sampler2D map;
-    uniform float uSat;
-    varying vec2 vUv;
-    vec3 toGray(vec3 c){ float y = dot(c, vec3(0.2126,0.7152,0.0722)); return vec3(y); }
-    void main(){
-      vec4 t = texture2D(map, vUv);
-      vec3 g = toGray(t.rgb);
-      vec3 outc = mix(g, t.rgb, uSat);
-      gl_FragColor = vec4(outc, t.a);
-    }`
-};
-
-//Create tiles in a circle facing inward
-for (let i = 0; i < IMAGE_URLS.length; i++){
-  const t = i / IMAGE_URLS.length;
-  const angle = t * Math.PI * 2;
-
-  const x = Math.sin(angle) * RADIUS;
-  const z = Math.cos(angle) * RADIUS;
-
-  // Material with texture
-  const tex = loader.load(IMAGE_URLS[i]);
-
-  //Desaturation shader material
-  const mat = new THREE.ShaderMaterial(
-    { uniforms: fx.uniforms(),
-      vertexShader: fx.vert,
-      fragmentShader: fx.frag,
-      transparent: true,
-      side: THREE.DoubleSide
-    }
-  );
-  mat.uniforms.map.value = tex;
-
-  const amb = new THREE.AmbientLight(0xffffff, 0.2);
-  const dir = new THREE.DirectionalLight(0xffffff, 0.1);
-  dir.position.set(2, 2, 10);
-  scene.add(amb, dir);
-
-  const tile = new THREE.Mesh(tileGeo, mat);
-  
-  // Position & orient the tile
-  tile.position.set(x, 0, z);
-  tile.lookAt(0, 0, 0);   // make the tile face the center
-  tile.rotateY(Math.PI);  // correct its left-right orientation
-  tile.rotateY(Math.PI / 2);  // +90° so each tile is tangent, i.e., edge-on at the front
-
-  carousel.add(tile);
-
-  // Custom data for each tile
-  const idx = i;                                 // index around the ring
-  const group = Math.floor(idx / GROUP_SIZE);    // 0,1,2
-  tile.userData = {
-    index: idx,
-    group,
-    scaleTarget: 1,
-    satTarget: 1
-  };
-
-}
-
-
-//INTERACTION -----------------------
-//GENTLE SPIN, DAMPING & HOVER STOP
-const baseSpin  = 0.0010; // idle
-let   extraSpin = 0.050;  // fling kick
-const damping   = 0.95;   // decay for the kick
-
-//ease
-const SCALE_LERP = 18;   // higher = snappier
-const COLOR_LERP = 14;
-const clock = new THREE.Clock();
 
 function tick(){
-  const dt = Math.min(0.05, clock.getDelta());       // stable, capped delta
-  const paused = holdPaused || hoveringPhoto;
+  carousell.rotation.y += spinV;
+  spinV *= damping;
 
-  if (!paused){
-    carousel.rotation.y += baseSpin + extraSpin;
-    extraSpin *= damping;
-  } else {
-    // Optional: bleed fling while held so it settles sooner
-    extraSpin *= 0.90;
-  }
-
-  // Smoothly move toward targets
-  const kS = 1 - Math.exp(-SCALE_LERP * dt);
-  const kC = 1 - Math.exp(-COLOR_LERP * dt);
-
-  for (const mesh of carousel.children){
-    const tScale = mesh.userData.scaleTarget;
-    const s = mesh.scale.x + (tScale - mesh.scale.x) * kS;
-    mesh.scale.setScalar(s);
-
-    const tSat = mesh.userData.satTarget;
-    const u = mesh.material.uniforms;
-    u.uSat.value += (tSat - u.uSat.value) * kC;
-  }
-
-  controls.update();
-  renderer.render(scene, camera);
-  requestAnimationFrame(tick);
+  controls.update(); 
+  renderer.render(scene, camera); 
+  requestAnimationFrame(tick); 
 }
 
 tick();
-updateCaption();
+
+// Setting up the scene lights for step 5 
+const amb = new THREE.AmbientLight(0xffffff, 0.7);
+const dir = new THREE.DirectionalLight(0xffffff, 0.8);
+dir.position.set(2, 3, 2); // the light position is at (2, 3, 2)
+scene.add(amb, dir);
 
 
 
-//9. SCALE & SATURATION EFFECTS -----------------------
-//Helpers compute targets for scale and saturation
-function ringDistance(a, b, n){
-  const d = Math.abs(a - b);
-  return Math.min(d, n - d);
-}
 
-function updateTargets(){
-  const active = holdPaused && heldIndex >= 0;
 
-  for (const mesh of carousel.children){
-    const data = mesh.userData;
+// 04 - LOADING MANAGER ------------------------------------------------------------------------
+const overlay      = document.getElementById("overlay");
+const loaderStatus  = document.getElementById("loader-status");
+const openBtn  = document.getElementById("open-btn");
+const closeBtn  = document.getElementById("close-btn");
+const overlayProgressBar = document.getElementById("overlay-progress-bar");
 
-    if (!active){
-      data.scaleTarget = 1.0;
-      data.satTarget   = 1.0;
-      continue;
-    }
+const loadingManager = new THREE.LoadingManager();
 
-    const heldGroup  = Math.floor(heldIndex / GROUP_SIZE);
+// Called when loading starts
+loadingManager.onStart = (url, loaded, total) => {
+  loaderStatus.textContent = "LOADING IMAGES . . . 0%";
+  overlayProgressBar.style.width = "0%";
+};
+// Called every time one item is loaded
+loadingManager.onProgress = (url, loaded, total) => {
+  const progress = Math.round((loaded / total) * 100);
+  loaderStatus.textContent = `LOADING IMAGES . . .${progress}%`;
+  overlayProgressBar.style.width = `${progress}%`;
+};
+// Called when ALL items using this manager are done
+loadingManager.onLoad = () => {
+  overlayProgressBar.style.width = "100%";
+  loaderStatus.textContent = "OPEN INVITATION";
+  loaderStatus.classList.remove("loader-base-color");
+  loaderStatus.classList.add("loader-update-color");
+  openBtn.disabled = false;
+};
 
-    // 1) Desaturate other groups
-    data.satTarget = (data.group === heldGroup) ? 1.0 : 0.0;
 
-    // 2) Scale based on circular distance from the held tile
-    const dist       = ringDistance(data.index, heldIndex, N);
-    const maxReach   = 3.0;              // how many neighbors get noticeable boost
-    const influence  = Math.max(0, 1 - dist / maxReach);
-    const peakScale  = 1.5;              // held tile max
-    const curvePower = 1.25;             // softness of falloff
 
-    data.scaleTarget = 1 + (peakScale - 1) * Math.pow(influence, curvePower);
+
+
+
+
+
+// 05 - SHADERS UPDATE----------------------------------------------------------------------------------
+//UV REMPAP
+function remapUVsToXY(geometry) {
+  geometry.computeBoundingBox();
+  const bbox = geometry.boundingBox;
+  const size = new THREE.Vector3().subVectors(bbox.max, bbox.min);
+
+  const pos = geometry.attributes.position;
+  const uv  = geometry.attributes.uv;
+
+  for (let i = 0; i < uv.count; i++) {
+    const x = pos.getX(i);
+    const y = pos.getY(i);
+
+    uv.setXY(
+      i,
+      (x - bbox.min.x) / size.x,
+      (y - bbox.min.y) / size.y
+    );
   }
+  uv.needsUpdate = true;
 }
-updateTargets()
+
+//Put images to Array
+const imgURLs = [];
+for (let i = 1; i <= 24; i++) {
+  imgURLs.push(`images/photo${i}.webp`);
+}
+
+//create and load a texture through image loop
+const loader = new THREE.TextureLoader(loadingManager);
 
 
-let _capT = 0;
-function updateCaptionDebounced(){
-  const now = performance.now();
-  if (now - _capT > 150){ _capT = now; updateCaption(); }
-}
-updateCaptionDebounced()
+imgURLs.forEach((url, i) => {
+
+  loader.load(url, (tex) => {
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+
+    //Get image dimensions from THIS texture
+    /*
+    const img = tex.image;
+    const imgAspect = img.width / img.height;
+    */
+
+    const height = 1.5;
+    const width = 2;
+    const radius = 4.0; // radius of carousel
+    
+
+    //Create the extruded card shape
+    const shape = new THREE.Shape();
+    shape.moveTo(-width / 2, -height / 2);
+    shape.lineTo( width / 2, -height / 2);
+    shape.lineTo( width / 2,  height / 2);
+    shape.lineTo(-width / 2,  height / 2);
+    shape.lineTo(-width / 2, -height / 2);
+
+    const extrudeSettings = {
+      depth: 0.05,
+      bevelEnabled: false
+    };
+
+    const geo = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+
+
+    // Remap UVs so the texture appears correctly
+    remapUVsToXY(geo);
+
+
+    // Materials
+    const matFrontBack = new THREE.MeshStandardMaterial({
+      map: tex,
+      metalness: 0,
+      roughness: 0
+    });
+
+    const matSides = new THREE.MeshStandardMaterial({
+      color: 0x951e20,
+      metalness: 0,
+      roughness: 1
+    });
+
+    const card = new THREE.Mesh(geo, [matFrontBack, matSides]);
+
+
+    //Position this card in the circle
+    const t = i / imgURLs.length;
+    const angle = t * Math.PI * 2;
+
+    const x = Math.sin(angle) * radius;
+    const z = Math.cos(angle) * radius;
+
+    card.position.set(x, 0, z);
+    card.lookAt(0, 0, 0);
+    card.rotateY(Math.PI * 0.5);
+
+    // Add to carousell
+    carousell.add(card);
+
+  });
+});
+
+
+
+
+
+
+
+
+//Overlay open button -----------------------------------------------------------------------------------
+//click handler for open button
+openBtn.addEventListener("click", () => {
+  overlay.classList.toggle('open');
+  overlay.classList.remove('close');
+});
+closeBtn.addEventListener("click", () => {
+  overlay.classList.toggle('close');
+  overlay.classList.remove('open');
+});
+
+
+
+
+
+// 04 - ORBIT CONTROLS----------------------------------------------------------------------------------
+controls.enablePan = false;      // keeps things centered; we don’t need pan
+controls.enableDamping = true;   // smooth motion
+controls.dampingFactor = 0.08;   // how smooth the motion is
+controls.minDistance = 1;      // zoom limits so you don’t lick the pixels
+controls.maxDistance = 12;       // zoom limits so you don’t lick the pixels
+
+
+
+
