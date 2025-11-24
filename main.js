@@ -1,4 +1,6 @@
-import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js";
+
+
+import * as THREE from "https://unpkg.com/three@0.161.0/build/three.module.js";
 import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.161.0/examples/jsm/controls/OrbitControls.js";
 
 // 01 - RENDERER -------------------------------------------------------------------------------------------
@@ -30,10 +32,9 @@ renderer.outputColorSpace = THREE.SRGBColorSpace; // ensures colors look correct
 
 
 // 02 - SCENE CAMERA ANIMATION LOOP ------------------------------------------------------------------
-// Scene + camera
+// SCENE + CAMERA
 const scene  = new THREE.Scene(); // create a scene to hold all our 3D objects
-const camera = new THREE.PerspectiveCamera(55, canvasWidth/canvasHeight, 0.1, 200); // fov, aspect, near clipping, far clipping
-camera.position.set(0, 0, 3); // move the camera Z units back on Z so we can view the scene
+const camera = new THREE.PerspectiveCamera(65, canvasWidth/canvasHeight, 0.1, 200); // fov, aspect, near clipping, far clipping
 window.addEventListener("resize", onResize);
 onResize(); 
 
@@ -43,17 +44,44 @@ const carousell = new THREE.Group();
 scene.add(carousell);
 
 
-//Animation loop
+//ANIMATION LOOP
 const controls = new OrbitControls(camera, renderer.domElement);
 const clock = new THREE.Clock();
 
-let spinV = 0.2;   // velocity
-const damping = 0.98; 
+//spinning animation
+let spinImpulse = 0;      // will decay to 0
+const spinBase   = 0.001; // constant slow spin forever
+const damping    = 0.98;
 
+//camera animation
+let isCameraAnimating = false;
+let camStartTime = 0;
+const camDuration = 1500;
 
 function tick(){
-  carousell.rotation.y += spinV;
-  spinV *= damping;
+  const dt = clock.getDelta();
+
+  // CAMERA ANIMATION
+  if (isCameraAnimating) {
+    const now = Date.now();
+    const elapsed = now - camStartTime;
+    const t = Math.min(elapsed / camDuration, 1); // 0 → 1
+
+    // smooth cubic ease
+    const easing = 1 - Math.pow(1 - t, 3);
+
+    camera.position.y = 20 + (0 - 20) * easing;
+
+    if (t === 1) {
+      isCameraAnimating = false;
+    }
+  }
+
+  console.log(camera.position);
+
+  const spin = spinBase + spinImpulse;
+  carousell.rotation.y += spin;
+  spinImpulse *= damping;     // decays the impulse
 
   controls.update(); 
   renderer.render(scene, camera); 
@@ -86,28 +114,37 @@ const overlay      = document.getElementById("overlay");
 const loaderStatus  = document.getElementById("loader-status");
 const openBtn  = document.getElementById("open-btn");
 const closeBtn  = document.getElementById("close-btn");
-
+const overlayProgressBar = document.getElementById("overlay-progress-bar");
 const loadingManager = new THREE.LoadingManager();
 
 // Called when loading starts
 loadingManager.onStart = (url, loaded, total) => {
-  loaderStatus.textContent = "LOADING IMAGES . . . 0%";
+  loaderStatus.textContent = "LOADING ASSETS . . . 0%";
+  overlayProgressBar.style.width = "0%";
 };
 // Called every time one item is loaded
 loadingManager.onProgress = (url, loaded, total) => {
   const progress = Math.round((loaded / total) * 100);
-  loaderStatus.textContent = `LOADING IMAGES . . .${progress}%`;
+  loaderStatus.textContent = `LOADING ASSETS . . .${progress}%`;
+  overlayProgressBar.style.width = `${progress}%`;
 };
 // Called when ALL items using this manager are done
 loadingManager.onLoad = () => {
   loaderStatus.textContent = "OPEN INVITATION";
-  loaderStatus.classList.remove("loader-base-color");
-  loaderStatus.classList.add("loader-update-color");
   openBtn.disabled = false;
 
   // PRE-WARM: compile shaders & textures once
   renderer.compile(scene, camera);
   renderer.render(scene, camera);
+
+  // wait 5 seconds before showing an active OPEN button
+  setTimeout(() => {
+    loaderStatus.textContent = "OPEN INVITATION";
+    openBtn.disabled = false;          // button becomes clickable
+    // optional visual cues:
+    // openBtn.style.opacity = "1";
+    // openBtn.style.pointerEvents = "auto";
+  }, 5000);
 };
 
 
@@ -164,7 +201,7 @@ imgURLs.forEach((url, i) => {
 
     const height = 1.2;
     const width = 1.8;
-    const radius = 5.0; // radius of carousel
+    const radius = 4.0; // radius of carousel
     
 
     //Create the extruded card shape
@@ -232,11 +269,27 @@ imgURLs.forEach((url, i) => {
 openBtn.addEventListener("click", () => {
   overlay.classList.toggle('open');
   overlay.classList.remove('close');
+
+  // reset spin when user opens, so it hasn't decayed in the background
+  spinImpulse = 0.2;
+
+  // start camera animation
+  camera.position.set(0, 20, 10); // start point
+  camStartTime = Date.now();
+  isCameraAnimating = true;
 });
+
 closeBtn.addEventListener("click", () => {
   overlay.classList.toggle('close');
   overlay.classList.remove('open');
+
+  spinImpulse = 0.2;
+
+  camera.position.set(0, 20, 10); // start point
+  camStartTime = Date.now();
+  isCameraAnimating = true;
 });
+
 
 
 
