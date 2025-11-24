@@ -1,8 +1,5 @@
 canvas { touch-action: none; }
 
-
-
-/* DM Mono */
 @font-face {
   font-family: 'DMMono-Light';
   font-style: normal;
@@ -71,13 +68,10 @@ html, body {
   color: var(--fg);
   transition: transform 1s ease;
 }
-
-#overlay h1{
-  margin: 0;
-  font-size: 1rem;
-  font-family: "DMMono-Light", monospace;
-  font-weight: 300;
-  font-style: normal;
+#overlay   h1{
+    margin: 0;
+    font-size: 1rem;
+    font-family: 'DMMono-light', monospace;
 }
 
 /* Centered content */
@@ -99,15 +93,16 @@ html, body {
   margin: 0;
   padding: 0;
   text-align: center;
-}
+  
 
-.overlay-inner .container-1 p {
-  color:  #fff8e8;
-  margin: 0;
-  padding: 0;
-  font-family: 'DMMono-Regular', monospace;
-  font-size: .6rem;
+  p {
+    color:  #fff8e8;
+    margin: 0;
+    padding: 0;
+    font-family: 'DMMono-Regular', monospace;
+    font-size: .6rem;
   }
+}
 
 .overlay-inner .container-1 .upper-caption{
   display: flex;
@@ -132,10 +127,10 @@ html, body {
   display: flex;
   flex-direction: row;
   width: 100%;
-  p {
+}
+.overlay-inner .container-1 .lower-caption  p {
     padding-top: 5px;
     text-align: right;
-  }
 }
 .overlay-inner .container-1 .lower-caption .block{
   flex: 1;
@@ -183,8 +178,7 @@ html, body {
   margin: 0;
   padding: 0 0 1rem 0;
 }
-
-.overlay-inner .container-3 .wellcome-text h1{
+.overlay-inner .container-3 .wellcome-text  h1{
     padding-top: .5rem;
     color: #fff8e8;
 }
@@ -239,8 +233,36 @@ transform: translate(0, 0);
 /*ANIMATION*/
 
 /* Slide in captions from top */
+.container-1 img,
+.container-2 .guest-name hr{
+  opacity: 0;
+  transform: translateY(-20px);
+  animation: slideDownFade 1s ease forwards;
+}
 
+.upper-caption .block p,
+.lower-caption .block p,
+.guest-name h1,
+.wellcome-text h1 {
+  opacity: 0;
+  transform: translateY(-20px);
+  animation: slideDownFade 1s ease forwards;
+  animation-delay: 0.1s;
+}
+/*
+.container-3 {
+  opacity: 0;
+  animation: fadeIn 1s ease forwards;
+  animation-delay: .25s;
+}
 
+.container-3 .wellcome-text,
+#loader-status {
+  opacity: 0;
+  animation: fadeIn 1s ease forwards;
+  animation-delay: .5s;
+}
+*/
 /* Keyframes */
 @keyframes overlay-progress-bar {
   from { width: 0; }
@@ -270,7 +292,7 @@ transform: translate(0, 0);
   inset: 0; 
   z-index: 1; 
   width: 100%;
-  height:  50Vh;
+  height:  70Vh;
   transform: translateY(-50%);
   top: 50%; ;
   }
@@ -279,14 +301,3 @@ transform: translate(0, 0);
 canvas {
   touch-action: none;        /* keeps mobile gestures from hijacking pointers */
 }
-
-
-
-
-
-
-
-
-
-
-
