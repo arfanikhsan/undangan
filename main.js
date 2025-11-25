@@ -47,7 +47,6 @@ scene.add(carousell);
 
 //ANIMATION LOOP
 const controls = new OrbitControls(camera, renderer.domElement);
-const clock = new THREE.Clock();
 
 //spinning animation
 let spinImpulse = 0;      // will decay to 0
@@ -62,9 +61,6 @@ let camEnd   = new THREE.Vector3(0, 0, 9);
 const camDuration = 5000;
 
 function tick(){  requestAnimationFrame(tick);
-
-  const dt = clock.getDelta();
-
   // CAMERA ANIMATION
   if (isCameraAnimating) {
     const now = Date.now();
@@ -188,7 +184,6 @@ for (let i = 1; i <= 24; i++) {
 //create and load a texture through image loop
 const loader = new THREE.TextureLoader(loadingManager);
 
-
 imgURLs.forEach((url, i) => {
 
   loader.load(url, (tex) => {
@@ -291,6 +286,7 @@ closeBtn.addEventListener("click", () => {
   camStartTime = Date.now();
   isCameraAnimating = true;
 });
+
 
 
 
