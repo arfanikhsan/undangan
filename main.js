@@ -103,6 +103,55 @@ function updatePointerFromEvent(event) {
   pointer.y = -(y * 2 - 1);
 }
 
+function getCardFromHitObject(obj) {
+  let current = obj;
+  while (current && !cardMeshes.includes(current)) {
+    current = current.parent;
+  }
+  return cardMeshes.includes(current) ? current : null;
+}
+
+function focusOnCard(card) {
+  if (!card) return;
+
+  isFocused = true;
+  focusedCard = card;
+
+  // stop spin
+  spinImpulse = 0;
+
+  // rotate this card so its textured face looks at the camera
+  // (keep y-level so it doesn’t tilt up/down)
+  const worldPos = new THREE.Vector3();
+  card.getWorldPosition(worldPos);
+
+  const lookTarget = new THREE.Vector3(
+    camera.position.x,
+    worldPos.y,
+    camera.position.z
+  );
+
+  card.lookAt(lookTarget);
+}
+
+function exitFocusMode() {
+  if (!isFocused) return;
+
+  isFocused = false;
+
+  // restore all cards
+  cardMeshes.forEach(card => {
+    if (card.userData.originalQuat) {
+      card.quaternion.copy(card.userData.originalQuat);
+    }
+    card.scale.set(1, 1, 1);
+    card.visible = true;
+  });
+
+  focusedCard = null;
+}
+
+
 function onPointerDown(event) {
   updatePointerFromEvent(event);
 
@@ -113,7 +162,23 @@ function onPointerDown(event) {
     // user is pressing on a card → stop spinning
     isHoldingCard = true;
   }
+
+   else {
+    // FOCUSED MODE: tap outside focused card → exit focus
+    if (hits.length === 0) {
+      // tapped empty space
+      exitFocusMode();
+    } else {
+      const hitCard = getCardFromHitObject(hits[0].object);
+      if (!hitCard || hitCard !== focusedCard) {
+        // tapped something that isn’t the active card
+        exitFocusMode();
+      }
+    }
+} 
 }
+
+
 
 function onPointerUp(event) {
   isHoldingCard = false;
@@ -129,6 +194,10 @@ renderer.domElement.addEventListener('pointerleave', onPointerUp);
 let spinImpulse = 0;      // will decay to 0
 const spinBase   = 0.002; // constant slow spin forever
 const damping    = 0.99;
+
+// FOCUS MODE (single-card view)
+let isFocused = false;
+let focusedCard = null;
 
 
 //CAMERA ANIMATE
@@ -187,7 +256,7 @@ function getCaptionForCard(card) {
 
   const idx = card.userData.cardIndex; // 0-based index
 
-  if (idx >= 6 && idx <=9) return "Mayasti’s biography";
+  if (idx >= 6 && idx <=9) return "Caption A";
   // fallback for others
   return '';
 }
@@ -201,8 +270,6 @@ function showCaption(text) {
     captionEl.classList.add('visible');
   }
 }
-
-
 
 function tick() {
   requestAnimationFrame(tick);
@@ -220,16 +287,37 @@ function tick() {
     // interpolate smoothly from camStart → camEnd
     camera.position.lerpVectors(camStart, camEnd, easing);
 
-    if (t === 1) {
-      isCameraAnimating = false;
+      if (t === 1) {
+        isCameraAnimating = false;
+      }
     }
+
+    if (!isHoldingCard) {
+      const spin = spinBase + spinImpulse;
+      carousell.rotation.y += spin;
+      spinImpulse *= damping;
+    }
+
+
+  if (isFocused && focusedCard) {
+    cardMeshes.forEach(card => {
+      const targetScale = (card === focusedCard) ? 1 : 0;
+      const s = THREE.MathUtils.lerp(card.scale.x, targetScale, 0.15);
+      card.scale.set(s, s, s);
+      card.visible = s > 0.02;
+    });
+  } else {
+    cardMeshes.forEach(card => {
+      const s = THREE.MathUtils.lerp(card.scale.x, 1, 0.15);
+      card.scale.set(s, s, s);
+      card.visible = true;
+    });
   }
 
-  if (!isHoldingCard) {
-    const spin = spinBase + spinImpulse;
-    carousell.rotation.y += spin;
-    spinImpulse *= damping;
-  }
+  controls.update();
+
+
+
   controls.update();
 
   // all the front-card / caption / tick sound logic in one place:
@@ -403,6 +491,10 @@ imgURLs.forEach((url, i) => {
 
     card.position.set(x, 0, z);
     card.lookAt(0, 0, 0);
+
+    // store original orientation so we can restore after focus mode
+    card.userData.originalQuat = card.quaternion.clone();
+
     card.rotateY(Math.PI * 0.5);
 
     card.userData.cardIndex = i; // <— remember which card this is
