@@ -1,6 +1,4 @@
-
-
-import * as THREE from "https://unpkg.com/three@0.161.0/build/three.module.js";
+import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js";
 import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.161.0/examples/jsm/controls/OrbitControls.js";
 
 // 01 - RENDERER -------------------------------------------------------------------------------------------
@@ -32,300 +30,35 @@ renderer.outputColorSpace = THREE.SRGBColorSpace; // ensures colors look correct
 
 
 // 02 - SCENE CAMERA ANIMATION LOOP ------------------------------------------------------------------
-// SCENE + CAMERA
+// Scene + camera
 const scene  = new THREE.Scene(); // create a scene to hold all our 3D objects
-const camera = new THREE.PerspectiveCamera(65, canvasWidth/canvasHeight, 0.1, 200); // fov, aspect, near clipping, far clipping
-camera.position.set(0, 20, 0); // move the camera Z units back on Z so we can view the scene
+const camera = new THREE.PerspectiveCamera(55, canvasWidth/canvasHeight, 0.1, 200); // fov, aspect, near clipping, far clipping
+camera.position.set(0, 0, 3); // move the camera Z units back on Z so we can view the scene
 window.addEventListener("resize", onResize);
 onResize(); 
 
-
-//Card array
-const cardMeshes = []; 
 
 //Create the carousell and put it into the scene
 const carousell = new THREE.Group();
 scene.add(carousell);
 
 
-//Finding front card
-function getFrontFacingCard(cards, camera) {
-  if (!cards || cards.length === 0) return null;
-
-  const camDir = new THREE.Vector3();
-  camera.getWorldDirection(camDir);
-  camDir.negate(); // direction *towards* camera
-
-  const localNormal = new THREE.Vector3(0, 0, 1); // card front in local space
-  const worldNormal = new THREE.Vector3();
-  const worldQuat = new THREE.Quaternion();
-
-  let bestCard = null;
-  let bestDot = -Infinity;
-
-  for (const card of cards) {
-    // ✅ include parent transforms (carousel rotation)
-    card.getWorldQuaternion(worldQuat);
-    worldNormal.copy(localNormal).applyQuaternion(worldQuat);
-
-    const dot = worldNormal.dot(camDir);
-
-    if (dot > bestDot) {
-      bestDot = dot;
-      bestCard = card;
-    }
-  }
-
-  const ALIGN_THRESHOLD = 0.9; // you can tweak
-  if (bestDot < ALIGN_THRESHOLD) return null;
-
-  return bestCard;
-}
-
-
-
-
-//ANIMATION LOOP
+//Animation loop
 const controls = new OrbitControls(camera, renderer.domElement);
 const clock = new THREE.Clock();
-//FOR POINTER CONTROL
-const raycaster = new THREE.Raycaster();
-const pointer = new THREE.Vector2();
-let isHoldingCard = false;   // <-- new flag
 
-//POINTER HELPER
-function updatePointerFromEvent(event) {
-  const rect = renderer.domElement.getBoundingClientRect();
-  const x = (event.clientX - rect.left) / rect.width;
-  const y = (event.clientY - rect.top) / rect.height;
+let spinV = 0.2;   // velocity
+const damping = 0.98; 
 
-  pointer.x = x * 2 - 1;
-  pointer.y = -(y * 2 - 1);
+
+function tick(){
+  carousell.rotation.y += spinV;
+  spinV *= damping;
+
+  controls.update(); 
+  renderer.render(scene, camera); 
+  requestAnimationFrame(tick); 
 }
-
-function getCardFromHitObject(obj) {
-  let current = obj;
-  while (current && !cardMeshes.includes(current)) {
-    current = current.parent;
-  }
-  return cardMeshes.includes(current) ? current : null;
-}
-
-function focusOnCard(card) {
-  if (!card) return;
-
-  isFocused = true;
-  focusedCard = card;
-
-  // stop spin
-  spinImpulse = 0;
-
-  // rotate this card so its textured face looks at the camera
-  // (keep y-level so it doesn’t tilt up/down)
-  const worldPos = new THREE.Vector3();
-  card.getWorldPosition(worldPos);
-
-  const lookTarget = new THREE.Vector3(
-    camera.position.x,
-    worldPos.y,
-    camera.position.z
-  );
-
-  card.lookAt(lookTarget);
-}
-
-function exitFocusMode() {
-  if (!isFocused) return;
-
-  isFocused = false;
-
-  // restore all cards
-  cardMeshes.forEach(card => {
-    if (card.userData.originalQuat) {
-      card.quaternion.copy(card.userData.originalQuat);
-    }
-    card.scale.set(1, 1, 1);
-    card.visible = true;
-  });
-
-  focusedCard = null;
-}
-
-
-function onPointerDown(event) {
-  updatePointerFromEvent(event);
-
-  raycaster.setFromCamera(pointer, camera);
-  const hits = raycaster.intersectObjects(cardMeshes, true);
-
-  if (hits.length > 0) {
-    // user is pressing on a card → stop spinning
-    isHoldingCard = true;
-  }
-
-   else {
-    // FOCUSED MODE: tap outside focused card → exit focus
-    if (hits.length === 0) {
-      // tapped empty space
-      exitFocusMode();
-    } else {
-      const hitCard = getCardFromHitObject(hits[0].object);
-      if (!hitCard || hitCard !== focusedCard) {
-        // tapped something that isn’t the active card
-        exitFocusMode();
-      }
-    }
-} 
-}
-
-
-
-function onPointerUp(event) {
-  isHoldingCard = false;
-}
-
-renderer.domElement.addEventListener('pointerdown', onPointerDown);
-renderer.domElement.addEventListener('pointerup', onPointerUp);
-renderer.domElement.addEventListener('pointercancel', onPointerUp);
-renderer.domElement.addEventListener('pointerleave', onPointerUp);
-
-
-//SPINNING
-let spinImpulse = 0;      // will decay to 0
-const spinBase   = 0.002; // constant slow spin forever
-const damping    = 0.99;
-
-// FOCUS MODE (single-card view)
-let isFocused = false;
-let focusedCard = null;
-
-
-//CAMERA ANIMATE
-let isCameraAnimating = false;
-let camStartTime = 0;
-let camStart = new THREE.Vector3();
-let camEnd   = new THREE.Vector3(0, 0, 9);
-const camDuration = 5000;
-
-//SOUND
-//Load sound
-const tickSound = document.getElementById('tick-sound');
-//Finding facing card
-// Keep state so we don't spam sounds
-let currentFrontCard = null;
-let lastFrontCard = null;
-let lastFrontCardWasAligned = false;
-function updateFrontCardState() {
-  if (!cardMeshes || cardMeshes.length === 0) return;
-
-  // Facing Card finder
-  const frontCard = getFrontFacingCard(cardMeshes, camera);
-  currentFrontCard = frontCard;
-
-  // caption handling
-  if (frontCard !== lastFrontCard) {
-    const captionText = getCaptionForCard(frontCard);
-    showCaption(captionText);
-  }
-
-  // Decide when to play the tick sound
-  if (frontCard) {
-    // Only tick when it *becomes* nicely aligned
-    if (!lastFrontCardWasAligned || frontCard !== lastFrontCard) {
-      tickSound.currentTime = 0;
-      tickSound.volume = 0.2;
-      tickSound.play().catch(() => {
-        // ignore autoplay block
-      });
-
-      lastFrontCardWasAligned = true;
-    }
-  } else {
-    // nothing really facing us
-    lastFrontCardWasAligned = false;
-  }
-
-  lastFrontCard = frontCard;
-}
-
-
-//CAPTION SETTING
-const captionEl = document.getElementById('card-caption');
-function getCaptionForCard(card) {
-  if (!card || card.userData.cardIndex === undefined) return '';
-
-  const idx = card.userData.cardIndex; // 0-based index
-
-  if (idx >= 6 && idx <=9) return "Caption A";
-  // fallback for others
-  return '';
-}
-function showCaption(text) {
-  if (!captionEl) return;
-  if (!text) {
-    captionEl.classList.remove('visible');
-    captionEl.textContent = '';
-  } else {
-    captionEl.textContent = text;
-    captionEl.classList.add('visible');
-  }
-}
-
-function tick() {
-  requestAnimationFrame(tick);
-
-  const dt = clock.getDelta();
-
-  // CAMERA ANIMATION
-  if (isCameraAnimating) {
-    const now = Date.now();
-    const elapsed = now - camStartTime;
-    const t = Math.min(elapsed / camDuration, 1);
-
-    const easing = 1 - Math.pow(1 - t, 3);
-
-    // interpolate smoothly from camStart → camEnd
-    camera.position.lerpVectors(camStart, camEnd, easing);
-
-      if (t === 1) {
-        isCameraAnimating = false;
-      }
-    }
-
-    if (!isHoldingCard) {
-      const spin = spinBase + spinImpulse;
-      carousell.rotation.y += spin;
-      spinImpulse *= damping;
-    }
-
-
-  if (isFocused && focusedCard) {
-    cardMeshes.forEach(card => {
-      const targetScale = (card === focusedCard) ? 1 : 0;
-      const s = THREE.MathUtils.lerp(card.scale.x, targetScale, 0.15);
-      card.scale.set(s, s, s);
-      card.visible = s > 0.02;
-    });
-  } else {
-    cardMeshes.forEach(card => {
-      const s = THREE.MathUtils.lerp(card.scale.x, 1, 0.15);
-      card.scale.set(s, s, s);
-      card.visible = true;
-    });
-  }
-
-  controls.update();
-
-
-
-  controls.update();
-
-  // all the front-card / caption / tick sound logic in one place:
-  updateFrontCardState();
-
-  renderer.render(scene, camera);
-}
-
 tick();
 
 // Setting up the scene lights for step 5 
@@ -353,40 +86,28 @@ const overlay      = document.getElementById("overlay");
 const loaderStatus  = document.getElementById("loader-status");
 const openBtn  = document.getElementById("open-btn");
 const closeBtn  = document.getElementById("close-btn");
-const overlayProgressBar = document.getElementById("overlay-progress-bar");
+
 const loadingManager = new THREE.LoadingManager();
-
-
-
 
 // Called when loading starts
 loadingManager.onStart = (url, loaded, total) => {
-  loaderStatus.textContent = "LOADING ASSETS . . . 0%";
-  overlayProgressBar.style.width = "0%";
+  loaderStatus.textContent = "LOADING IMAGES . . . 0%";
 };
 // Called every time one item is loaded
 loadingManager.onProgress = (url, loaded, total) => {
   const progress = Math.round((loaded / total) * 100);
-  loaderStatus.textContent = `LOADING ASSETS . . .${progress}%`;
-  overlayProgressBar.style.width = `${progress}%`;
+  loaderStatus.textContent = `LOADING IMAGES . . .${progress}%`;
 };
 // Called when ALL items using this manager are done
 loadingManager.onLoad = () => {
   loaderStatus.textContent = "OPEN INVITATION";
+  loaderStatus.classList.remove("loader-base-color");
+  loaderStatus.classList.add("loader-update-color");
   openBtn.disabled = false;
 
   // PRE-WARM: compile shaders & textures once
   renderer.compile(scene, camera);
   renderer.render(scene, camera);
-
-  // wait 5 seconds before showing an active OPEN button
-  setTimeout(() => {
-    loaderStatus.textContent = "OPEN INVITATION";
-    openBtn.disabled = false;          // button becomes clickable
-    // optional visual cues:
-    // openBtn.style.opacity = "1";
-    // openBtn.style.pointerEvents = "auto";
-  }, 5000);
 };
 
 
@@ -441,9 +162,9 @@ imgURLs.forEach((url, i) => {
     const imgAspect = img.width / img.height;
     */
 
-    const height = 1;
-    const width = 1;
-    const radius = 4.0; // radius of carousel
+    const height = 1.2;
+    const width = 1.8;
+    const radius = 5.0; // radius of carousel
     
 
     //Create the extruded card shape
@@ -491,20 +212,15 @@ imgURLs.forEach((url, i) => {
 
     card.position.set(x, 0, z);
     card.lookAt(0, 0, 0);
-
-    // store original orientation so we can restore after focus mode
-    card.userData.originalQuat = card.quaternion.clone();
-
     card.rotateY(Math.PI * 0.5);
-
-    card.userData.cardIndex = i; // <— remember which card this is
 
     // Add to carousell
     carousell.add(card);
-    cardMeshes.push(card);
 
   });
 });
+
+
 
 
 
@@ -516,25 +232,11 @@ imgURLs.forEach((url, i) => {
 openBtn.addEventListener("click", () => {
   overlay.classList.toggle('open');
   overlay.classList.remove('close');
-
-  // reset spin when user opens, so it hasn't decayed in the background
-  spinImpulse = 0.10;
-
-  // start camera animation
-  camStart.copy(camera.position); // start point
-  camStartTime = Date.now();
-  isCameraAnimating = true;
 });
-
 closeBtn.addEventListener("click", () => {
   overlay.classList.toggle('close');
   overlay.classList.remove('open');
-
-  spinImpulse = 0.10;
 });
-
-
-
 
 
 
