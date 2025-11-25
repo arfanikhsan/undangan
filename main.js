@@ -142,7 +142,7 @@ loadingManager.onLoad = () => {
     // optional visual cues:
     // openBtn.style.opacity = "1";
     // openBtn.style.pointerEvents = "auto";
-  }, 5000);
+  }, 3000);
 };
 
 
@@ -197,7 +197,7 @@ imgURLs.forEach((url, i) => {
     */
 
     const height = 1;
-    const width = 1;
+    const width = 2;
     const radius = 4.0; // radius of carousel
     
 
@@ -281,11 +281,8 @@ closeBtn.addEventListener("click", () => {
   overlay.classList.remove('open');
 
   spinImpulse = 0.2;
-
-  camera.position.set(0, 20, 10); // start point
-  camStartTime = Date.now();
-  isCameraAnimating = true;
 });
+
 
 
 
