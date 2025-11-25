@@ -81,10 +81,6 @@ function tick(){  requestAnimationFrame(tick);
     }
   }
 
-  
-
-  console.log(camera.position);
-
   const spin = spinBase + spinImpulse;
   carousell.rotation.y += spin;
   spinImpulse *= damping;     // decays the impulse
@@ -295,6 +291,7 @@ closeBtn.addEventListener("click", () => {
   camStartTime = Date.now();
   isCameraAnimating = true;
 });
+
 
 
 
