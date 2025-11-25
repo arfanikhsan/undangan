@@ -441,8 +441,8 @@ imgURLs.forEach((url, i) => {
     const imgAspect = img.width / img.height;
     */
 
-    const height = 1.2;
-    const width = 1.8;
+    const height = 1;
+    const width = 1;
     const radius = 4.0; // radius of carousel
     
 
@@ -532,6 +532,7 @@ closeBtn.addEventListener("click", () => {
 
   spinImpulse = 0.10;
 });
+
 
 
 
