@@ -35,6 +35,7 @@ renderer.outputColorSpace = THREE.SRGBColorSpace; // ensures colors look correct
 // SCENE + CAMERA
 const scene  = new THREE.Scene(); // create a scene to hold all our 3D objects
 const camera = new THREE.PerspectiveCamera(65, canvasWidth/canvasHeight, 0.1, 200); // fov, aspect, near clipping, far clipping
+camera.position.set(0, 10, 0); // move the camera Z units back on Z so we can view the scene
 window.addEventListener("resize", onResize);
 onResize(); 
 
@@ -56,26 +57,31 @@ const damping    = 0.98;
 //camera animation
 let isCameraAnimating = false;
 let camStartTime = 0;
-const camDuration = 1500;
+let camStart = new THREE.Vector3();
+let camEnd   = new THREE.Vector3(0, 0, 9);
+const camDuration = 5000;
 
-function tick(){
+function tick(){  requestAnimationFrame(tick);
+
   const dt = clock.getDelta();
 
   // CAMERA ANIMATION
   if (isCameraAnimating) {
     const now = Date.now();
     const elapsed = now - camStartTime;
-    const t = Math.min(elapsed / camDuration, 1); // 0 → 1
+    const t = Math.min(elapsed / camDuration, 1);
 
-    // smooth cubic ease
     const easing = 1 - Math.pow(1 - t, 3);
 
-    camera.position.y = 20 + (0 - 20) * easing;
+    // interpolate smoothly from camStart → camEnd
+    camera.position.lerpVectors(camStart, camEnd, easing);
 
     if (t === 1) {
       isCameraAnimating = false;
     }
   }
+
+  
 
   console.log(camera.position);
 
