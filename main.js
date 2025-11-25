@@ -1,14 +1,11 @@
-
-
-import * as THREE from "https://unpkg.com/three@0.161.0/build/three.module.js";
+import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js";
 import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.161.0/examples/jsm/controls/OrbitControls.js";
 
 // 01 - RENDERER -------------------------------------------------------------------------------------------
 
 const app = document.getElementById("app"); //look for the app div
-const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true }); 
-renderer.setPixelRatio(Math.min(devicePixelRatio, 2)); 
-
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true }); //Create engine that draws to canvas using webGL, with antialiasing and alpha for transparency
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2)); // set pixel ratio for hi-dpi screens, capped at 2 for performance
 // Set the size of the renderer to match the app div
 let canvasWidth  = app.clientWidth;
 let canvasHeight = app.clientHeight;
@@ -30,61 +27,35 @@ renderer.outputColorSpace = THREE.SRGBColorSpace; // ensures colors look correct
 
 
 
-
 // 02 - SCENE CAMERA ANIMATION LOOP ------------------------------------------------------------------
-// SCENE + CAMERA
+// Scene + camera
 const scene  = new THREE.Scene(); // create a scene to hold all our 3D objects
-const camera = new THREE.PerspectiveCamera(65, canvasWidth/canvasHeight, 0.1, 200); // fov, aspect, near clipping, far clipping
-camera.position.set(0, 10, 0); // move the camera Z units back on Z so we can view the scene
+const camera = new THREE.PerspectiveCamera(55, canvasWidth/canvasHeight, 0.1, 100); // fov, aspect, near clipping, far clipping
+camera.position.set(0, 0, 3); // move the camera Z units back on Z so we can view the scene
+
+// Every time the window is resized, update the renderer size and the camera aspect ratio
 window.addEventListener("resize", onResize);
 onResize(); 
-
 
 //Create the carousell and put it into the scene
 const carousell = new THREE.Group();
 scene.add(carousell);
 
+//Animation loop (for now)
+let spinV = 0.10;   // velocity (radians per frame-ish)
+const damping = 0.98; // 0.90 = heavy brake, 0.99 = floaty
 
-//ANIMATION LOOP
 const controls = new OrbitControls(camera, renderer.domElement);
 
-//spinning animation
-let spinImpulse = 0;      // will decay to 0
-const spinBase   = 0.001; // constant slow spin forever
-const damping    = 0.98;
-
-//camera animation
-let isCameraAnimating = false;
-let camStartTime = 0;
-let camStart = new THREE.Vector3();
-let camEnd   = new THREE.Vector3(0, 0, 9);
-const camDuration = 5000;
-
-function tick(){  requestAnimationFrame(tick);
-  // CAMERA ANIMATION
-  if (isCameraAnimating) {
-    const now = Date.now();
-    const elapsed = now - camStartTime;
-    const t = Math.min(elapsed / camDuration, 1);
-
-    const easing = 1 - Math.pow(1 - t, 3);
-
-    // interpolate smoothly from camStart → camEnd
-    camera.position.lerpVectors(camStart, camEnd, easing);
-
-    if (t === 1) {
-      isCameraAnimating = false;
-    }
-  }
-
-  const spin = spinBase + spinImpulse;
-  carousell.rotation.y += spin;
-  spinImpulse *= damping;     // decays the impulse
+function tick(){
+  carousell.rotation.y += spinV;
+  spinV *= damping;
 
   controls.update(); 
   renderer.render(scene, camera); 
   requestAnimationFrame(tick); 
 }
+
 tick();
 
 // Setting up the scene lights for step 5 
@@ -97,52 +68,33 @@ scene.add(amb, dir);
 
 
 
-// 04 - ORBIT CONTROLS----------------------------------------------------------------------------------
-controls.enablePan = false;      // keeps things centered; we don’t need pan
-controls.enableDamping = true;   // smooth motion
-controls.dampingFactor = 0.08;   // how smooth the motion is
-controls.minDistance = 1;      // zoom limits so you don’t lick the pixels
-controls.maxDistance = 20;       // zoom limits so you don’t lick the pixels
-
-
-
-
 // 04 - LOADING MANAGER ------------------------------------------------------------------------
 const overlay      = document.getElementById("overlay");
 const loaderStatus  = document.getElementById("loader-status");
 const openBtn  = document.getElementById("open-btn");
 const closeBtn  = document.getElementById("close-btn");
 const overlayProgressBar = document.getElementById("overlay-progress-bar");
+
 const loadingManager = new THREE.LoadingManager();
 
 // Called when loading starts
 loadingManager.onStart = (url, loaded, total) => {
-  loaderStatus.textContent = "LOADING ASSETS . . . 0%";
+  loaderStatus.textContent = "LOADING IMAGES . . . 0%";
   overlayProgressBar.style.width = "0%";
 };
 // Called every time one item is loaded
 loadingManager.onProgress = (url, loaded, total) => {
   const progress = Math.round((loaded / total) * 100);
-  loaderStatus.textContent = `LOADING ASSETS . . .${progress}%`;
+  loaderStatus.textContent = `LOADING IMAGES . . .${progress}%`;
   overlayProgressBar.style.width = `${progress}%`;
 };
 // Called when ALL items using this manager are done
 loadingManager.onLoad = () => {
+  overlayProgressBar.style.width = "100%";
   loaderStatus.textContent = "OPEN INVITATION";
+  loaderStatus.classList.remove("loader-base-color");
+  loaderStatus.classList.add("loader-update-color");
   openBtn.disabled = false;
-
-  // PRE-WARM: compile shaders & textures once
-  renderer.compile(scene, camera);
-  renderer.render(scene, camera);
-
-  // wait 5 seconds before showing an active OPEN button
-  setTimeout(() => {
-    loaderStatus.textContent = "OPEN INVITATION";
-    openBtn.disabled = false;          // button becomes clickable
-    // optional visual cues:
-    // openBtn.style.opacity = "1";
-    // openBtn.style.pointerEvents = "auto";
-  }, 3000);
 };
 
 
@@ -184,11 +136,12 @@ for (let i = 1; i <= 24; i++) {
 //create and load a texture through image loop
 const loader = new THREE.TextureLoader(loadingManager);
 
+
 imgURLs.forEach((url, i) => {
 
   loader.load(url, (tex) => {
     tex.colorSpace = THREE.SRGBColorSpace;
-    tex.anisotropy = Math.min(2, renderer.capabilities.getMaxAnisotropy());
+    tex.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
 
     //Get image dimensions from THIS texture
     /*
@@ -196,7 +149,7 @@ imgURLs.forEach((url, i) => {
     const imgAspect = img.width / img.height;
     */
 
-    const height = 1;
+    const height = 1.5;
     const width = 2;
     const radius = 4.0; // radius of carousel
     
@@ -266,27 +219,22 @@ imgURLs.forEach((url, i) => {
 openBtn.addEventListener("click", () => {
   overlay.classList.toggle('open');
   overlay.classList.remove('close');
-
-  // reset spin when user opens, so it hasn't decayed in the background
-  spinImpulse = 0.2;
-
-  // start camera animation
-  camera.position.set(0, 20, 10); // start point
-  camStartTime = Date.now();
-  isCameraAnimating = true;
 });
-
 closeBtn.addEventListener("click", () => {
   overlay.classList.toggle('close');
   overlay.classList.remove('open');
-
-  spinImpulse = 0.2;
 });
 
 
 
 
 
+// 04 - ORBIT CONTROLS----------------------------------------------------------------------------------
+controls.enablePan = false;      // keeps things centered; we don’t need pan
+controls.enableDamping = true;   // smooth motion
+controls.dampingFactor = 0.08;   // how smooth the motion is
+controls.minDistance = 1;      // zoom limits so you don’t lick the pixels
+controls.maxDistance = 12;       // zoom limits so you don’t lick the pixels
 
 
 
