@@ -64,6 +64,7 @@ let spinImpulse = 0;      // will decay to 0
 let spinBase   = 0.001; // constant slow spin forever
 const damping    = 0.99;
 
+
 //Camera Animation Helper
 let isCameraAnimating = false;
 let camStartTime = 0;
@@ -107,7 +108,27 @@ function focusCard(card) {
   cards.forEach(mesh => {
     setCardOpacity(mesh, 1);
   });
+
+  isCardRotating = true;
+  cardRotStartTime = performance.now();
+
+  // start from current Y rotation
+  cardRotStartY = card.rotation.y;
+
+  // rotate an extra 90° (π/2) so total becomes like Math.PI
+  cardRotEndY = card.rotation.y + Math.PI * 0.5;
+  
 }
+
+
+//card rotate
+let isCardRotating = false;
+let cardRotStartTime = 0;
+const cardRotDuration = 600; // ms, adjust for faster/slower flip
+
+let cardRotStartY = 0;
+let cardRotEndY = 0;
+
 
 
 
@@ -161,6 +182,22 @@ function tick(){
     if (t === 1) fadeActive = false;
   }
 
+
+  // 3. 🔹 rotate the focused card with ease
+  if (isCardRotating && focusedCard) {
+    const elapsed = now - cardRotStartTime;
+    const t = Math.min(elapsed / cardRotDuration, 1); // 0 → 1
+
+    // cubic ease-out
+    const ease = 1 - Math.pow(1 - t, 3);
+
+    const y = cardRotStartY + (cardRotEndY - cardRotStartY) * ease;
+    focusedCard.rotation.y = y;
+
+    if (t === 1) {
+      isCardRotating = false;
+    }
+  }
   
 
   //Execute
