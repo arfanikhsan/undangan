@@ -1,19 +1,23 @@
-
-
+// ===== [SECTION] IMPORTS =====
 import * as THREE from "https://unpkg.com/three@0.161.0/build/three.module.js";
 import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.161.0/examples/jsm/controls/OrbitControls.js";
 
-// RENDERER -------------------------------------------------------------------------------------------
+
+// ===== [SECTION] RENDERER & DOM =====
 const app = document.getElementById("app"); 
 const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true }); 
-renderer.setPixelRatio(Math.min(devicePixelRatio, 2)); 
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.outputColorSpace = THREE.SRGBColorSpace;
 
-// Set the size of the renderer to match the app div
+
 let canvasWidth  = app.clientWidth;
 let canvasHeight = app.clientHeight;
 renderer.setSize(canvasWidth, canvasHeight);
-renderer.outputColorSpace = THREE.SRGBColorSpace;
+app.appendChild(renderer.domElement); 
 
+/**
+ * [RESPONSIVE] Handle window resize: update renderer & camera aspect.
+ */
 function onResize() {
   canvasWidth  = app.clientWidth;
   canvasHeight = app.clientHeight;
@@ -22,126 +26,94 @@ function onResize() {
   camera.aspect = canvasWidth / canvasHeight;
   camera.updateProjectionMatrix();
 }
-app.appendChild(renderer.domElement); 
-
-//Color handler
-renderer.outputColorSpace = THREE.SRGBColorSpace;
-
-
-
-
-
-
-// SCENE + CAMERA --------------------------------------------------------------------------------
-// Setting up scene and camera
-const scene  = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(65, canvasWidth/canvasHeight, 0.1, 200); // fov, aspect, near clipping, far clipping
-camera.position.set(0, 20, 0);
 window.addEventListener("resize", onResize);
+
+
+
+
+
+
+// SCENE + CAMERA +LIGHT =========================================================================================================
+// ===== [SECTION] SCENE & CAMERA =====
+const scene  = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(
+  65, //FOV
+  canvasWidth/canvasHeight,  //Scene aspect
+  0.1, //Near clipping
+  200); //Far clipping
+camera.position.set(0, 20, 0);
 onResize(); 
 
-// Setting up the scene lights 
+// ===== [SECTION] LIGHTING =====
 const amb = new THREE.AmbientLight(0xffffff, 0.7);
 const dir = new THREE.DirectionalLight(0xffffff, 1);
-dir.position.set(2, 3, 2); // the light position is at (2, 3, 2)
+dir.position.set(2, 3, 2);
 scene.add(amb, dir);
 
 
 
 
-
-//SET UP AND HELPER --------------------------------------------------------------------------------
-//Orbit Helper
-const controls = new OrbitControls(camera, renderer.domElement);
+// GLOBAL STATE =========================================================================================================
+// ===== [SECTION] STATE & HELPERS =====
+//# Region Orbit Helper
 const clock = new THREE.Clock();
+const controls = new OrbitControls(camera, renderer.domElement);
 
-//Carousel
+
+//#region Carousel group
 const carousel = new THREE.Group();
 scene.add(carousel);
 
-//Spinning Helper
-let spinImpulse = 0;      // will decay to 0
-let spinBase   = 0.001; // constant slow spin forever
+//#region Spin state
+let spinImpulse = 0;      
+let spinBase   = 0.001; 
 const damping    = 0.99;
 
-
-//Camera Animation Helper
+//#region  camera animaion helper
 let isCameraAnimating = false;
 let camStartTime = 0;
 const camDuration = 3000;
 let camStart = new THREE.Vector3();
 let camEnd   = new THREE.Vector3(0, 0, 9);
 
-//Raycaster
-//Setup
+//#region Raycaster
 const raycaster = new THREE.Raycaster();
 const pointer = new THREE.Vector2();
 
-//Froze spin
+//#region Spin freeze flag
 let isSpinFrozen = false;
+
+//#region cards
 let focusedCard = null;
+const cards = [];
+
 //Fade state
 let fadeActive = false;
 let fadeStartTime = 0;
-const fadeDuration = 500; // ms
-
-//Picking a card
-const cards = [];
-
-function setCardOpacity(card, value) {
-  const mats = Array.isArray(card.material) ? card.material : [card.material];
-  mats.forEach(mat => {
-    mat.transparent = true;
-    mat.opacity = value;
-  });
-}
-
-function focusCard(card) {
-  focusedCard = card;
-  isSpinFrozen = true;
-  spinImpulse = 0; // or spinImpulse / spinBase = 0 if you use that pattern
-
-  fadeActive = true;
-  fadeStartTime = performance.now();
-
-  // reset all cards to fully visible before fading
-  cards.forEach(mesh => {
-    setCardOpacity(mesh, 1);
-  });
-
-  isCardRotating = true;
-  cardRotStartTime = performance.now();
-
-  // start from current Y rotation
-  cardRotStartY = card.rotation.y;
-
-  // rotate an extra 90° (π/2) so total becomes like Math.PI
-  cardRotEndY = card.rotation.y + Math.PI * 0.5;
-  
-}
-
-
-//card rotate
-let isCardRotating = false;
-let cardRotStartTime = 0;
-const cardRotDuration = 600; // ms, adjust for faster/slower flip
-
-let cardRotStartY = 0;
-let cardRotEndY = 0;
+const fadeDuration = 100; // ms
+let fadeDirection = null
 
 
 
 
 
-//ANIMATION LOOP --------------------------------------------------------------------------------
+// ===== [SECTION] ANIMATION LOOP =====
+/**
+ * [LOOP] Main render loop:
+ * 1) Update camera animation
+ * 2) Apply spin damping & base spin (unless frozen)
+ * 3) Update card transforms (spin / focus)
+ * 4) Update orbit controls
+ * 5) Render scene
+ */
 function tick(){
   const dt = clock.getDelta();
 
-  //Camera Animation
+  // [CAMERA ANIM]
   if (isCameraAnimating) {
     const now = Date.now();
     const elapsed = now - camStartTime;
-    const t = Math.min(elapsed / camDuration, 1); // 0 → 1
+    const t = Math.min(elapsed / camDuration, 1); 
 
     const easing = 1 - (1 - t) * (1 - t); //ease
 
@@ -152,84 +124,133 @@ function tick(){
     }
   }
 
-
   /*Spinning Animation
   const spin = spinBase + spinImpulse;
   carousel.rotation.y += spin;
-  spinImpulse *= damping;     // decays the impulse*/
+  spinImpulse *= damping;     */
 
+  // [SPIN] Update spinImpulse + apply to carousel
   if (!isSpinFrozen) {
     const spin = spinBase + spinImpulse;
     carousel.rotation.y += spin;
     spinImpulse *= damping;
   } 
 
-
-  const now = performance.now();
-  if (fadeActive && focusedCard) {
+  // [CARD RAYCAST] Fade when getting clicked
+  if (fadeActive) {
     const now = performance.now();
     const elapsed = now - fadeStartTime;
     const t = Math.min(elapsed / fadeDuration, 1);
 
-    cards.forEach(mesh => {
-      if (mesh === focusedCard) {
-        setCardOpacity(mesh, 1);         // clicked card stays visible
-      } else {
-        setCardOpacity(mesh, 1 - t);     // others fade to 0
-      }
-    });
+    if (fadeDirection === "out" && focusedCard) {
+      cards.forEach(mesh => {
+        if (mesh === focusedCard) {
+          setCardOpacity(mesh, 1);
+        } else {
+          setCardOpacity(mesh, 1 - t);
+        }
+      });
 
-    if (t === 1) fadeActive = false;
-  }
-
-
-  // 3. 🔹 rotate the focused card with ease
-  if (isCardRotating && focusedCard) {
-    const elapsed = now - cardRotStartTime;
-    const t = Math.min(elapsed / cardRotDuration, 1); // 0 → 1
-
-    // cubic ease-out
-    const ease = 1 - Math.pow(1 - t, 3);
-
-    const y = cardRotStartY + (cardRotEndY - cardRotStartY) * ease;
-    focusedCard.rotation.y = y;
+    } else if (fadeDirection === "in") {
+      cards.forEach(mesh => {
+        setCardOpacity(mesh, t);
+      });
+    }
 
     if (t === 1) {
-      isCardRotating = false;
+      fadeActive = false;
+      fadeDirection = null;
     }
   }
-  
 
-  //Execute
+
+  // [CONTROLS + RENDER]
   controls.update(); 
   renderer.render(scene, camera); 
   requestAnimationFrame(tick); 
-
-  //-----------------qwdqwd
-  console.log(isSpinFrozen)
-
 }
 tick();
 
 
 
 
+// ORBIT CONTROL =========================================================================================================
+// ===== [SECTION] CONTROLS =====
+controls.enablePan = false;      
+controls.enableDamping = true;   
+controls.dampingFactor = 0.08;   
+controls.minDistance = 1;      
+controls.maxDistance = 20;      
 
 
 
 
-// ORBIT CONTROLS----------------------------------------------------------------------------------
-controls.enablePan = false;      // keeps things centered; we don’t need pan
-controls.enableDamping = true;   // smooth motion
-controls.dampingFactor = 0.08;   // how smooth the motion is
-controls.minDistance = 1;      // zoom limits so you don’t lick the pixels
-controls.maxDistance = 20;       // zoom limits so you don’t lick the pixels
+
+// RAYCASTING =========================================================================================================
+// ===== [SECTION] RAYCASTING =====
+/**
+ * [FOCUS] Set opacity of a single card.
+ */
+function setCardOpacity(card, value) {
+  const mats = Array.isArray(card.material) ? card.material : [card.material];
+  mats.forEach(mat => {
+    mat.transparent = true;
+    mat.opacity = value;
+  });
+}
+
+
+/**
+ * [FOCUS] Focus a card:
+ * - Freeze spin
+ * - Remember focusedCard
+ * - Fade out all others
+ */
+function focusCard(card) {
+  focusedCard = card;
+  isSpinFrozen = true;
+  spinImpulse = 0; // or spinImpulse / spinBase = 0 if you use that pattern
+
+  fadeActive = true;
+  fadeDirection = "out"
+  fadeStartTime = performance.now();
+
+  // reset all cards to fully visible before fading
+  cards.forEach(mesh => {
+    setCardOpacity(mesh, 1);
+  });
+}
+
+
+/*
+  * [RESET FOCUS] Get back to the previous state
+*/
+function resetFocus() {
+  focusedCard = null;
+  isSpinFrozen = false;
+
+  fadeActive = true;
+  fadeDirection = "in";
+  fadeStartTime = performance.now();
+
+  cards.forEach(mesh => {
+    setCardOpacity(mesh, 0);
+  });
+
+  // OPTIONAL: give the spin a little kick again
+  // If you use a single spinV:
+  //spinImpulse = 0.01 // adjust to taste
+
+  // If you use spinBase/spinImpulse:
+  // spinBase = 0.003;
+  // spinImpulse = 0.0;
+}
 
 
 
-
-//RAYCASTER----------------------------------------------------------------------------------
-//Pointer/click handler
+/**
+ * [INPUT] Pointer down handler: raycast to cards and focus if hit.
+ */
 function onPointerDown(event) {
   const rect = renderer.domElement.getBoundingClientRect();
 
@@ -240,11 +261,20 @@ function onPointerDown(event) {
   pointer.y = -((clientY - rect.top) / rect.height) * 2 + 1;
 
   raycaster.setFromCamera(pointer, camera);
-  const intersects = raycaster.intersectObjects(cards);
+  
+  const intersects = raycaster.intersectObjects(cards);//Returns a sorted array with closest hit firs
 
   if (intersects.length > 0) {
-    const clickedCard = intersects[0].object;
-    focusCard(clickedCard);
+    let obj = intersects[0].object;
+
+    while (obj && !cards.includes(obj)) {
+      obj = obj.parent;
+    }
+    if (obj) {
+      focusCard(obj);
+    }
+  } else {
+    resetFocus();
   }
 }
 renderer.domElement.addEventListener('pointerdown', onPointerDown);
@@ -253,27 +283,27 @@ renderer.domElement.addEventListener('pointerdown', onPointerDown);
 
 
 
-
-// LOADING MANAGER ------------------------------------------------------------------------
+// LOADING MANAGER =========================================================================================================
+// ===== [SECTION] LOADER =====
+const loadingManager = new THREE.LoadingManager();
 const overlay      = document.getElementById("overlay");
 const loaderStatus  = document.getElementById("loader-status");
 const openBtn  = document.getElementById("open-btn");
 const closeBtn  = document.getElementById("close-btn");
 const overlayProgressBar = document.getElementById("overlay-progress-bar");
-const loadingManager = new THREE.LoadingManager();
 
-// Start
+/** [LOADER] Start */
 loadingManager.onStart = (url, loaded, total) => {
   loaderStatus.textContent = "LOADING ASSETS . . . 0%";
   overlayProgressBar.style.width = "0%";
 };
-// Progress
+/** [LOADER] Progress */
 loadingManager.onProgress = (url, loaded, total) => {
   const progress = Math.round((loaded / total) * 100);
   loaderStatus.textContent = `LOADING ASSETS . . .${progress}%`;
   overlayProgressBar.style.width = `${progress}%`;
 };
-// Load
+/** [LOADER] Finished */
 loadingManager.onLoad = () => {
   loaderStatus.textContent = "OPEN INVITATION";
   openBtn.disabled = false;
@@ -292,13 +322,21 @@ loadingManager.onLoad = () => {
   }, 5000);
 };
 
+const loader = new THREE.TextureLoader(loadingManager);
 
 
 
 
-// GEOMETRY & SHADERS UPDATE----------------------------------------------------------------------------------
+// GEO =========================================================================================================
+// ===== [SECTION] GEOMETRY & CARDS =====
+// [IMAGES] Put images to array
+const imgURLs = [];
+for (let i = 1; i <= 24; i++) {
+  imgURLs.push(`images/photo${i}.webp`);
+}
+
 //UV REMPAP
-function remapUVsToXY(geometry) {
+function remapUVsToXY(geometry) { 
   geometry.computeBoundingBox();
   const bbox = geometry.boundingBox;
   const size = new THREE.Vector3().subVectors(bbox.max, bbox.min);
@@ -319,14 +357,8 @@ function remapUVsToXY(geometry) {
   uv.needsUpdate = true;
 }
 
-//Puting images to Array
-const imgURLs = [];
-for (let i = 1; i <= 24; i++) {
-  imgURLs.push(`images/photo${i}.webp`);
-}
 
-//create and load a texture through image loop
-const loader = new THREE.TextureLoader(loadingManager);
+// [TEXTURES] Load all textures into array
 imgURLs.forEach((url, i) => {
 
   loader.load(url, (tex) => {
@@ -344,7 +376,7 @@ imgURLs.forEach((url, i) => {
     const radius = 4.0; // radius of carousel
     
 
-    //Create the extruded card shape
+    //Create extruded card shape
     const shape = new THREE.Shape();
     shape.moveTo(-width / 2, -height / 2);
     shape.lineTo( width / 2, -height / 2);
@@ -356,13 +388,11 @@ imgURLs.forEach((url, i) => {
       depth: 0.05,
       bevelEnabled: false
     };
-
+    //Create the geoometry
     const geo = new THREE.ExtrudeGeometry(shape, extrudeSettings);
 
-
-    // Remap UVs so the texture appears correctly
+    // Remap UVs
     remapUVsToXY(geo);
-
 
     // Materials
     const matFrontBack = new THREE.MeshStandardMaterial({
@@ -372,9 +402,8 @@ imgURLs.forEach((url, i) => {
       transparent: true,
       opacity: 1,
     });
-
     const matSides = new THREE.MeshStandardMaterial({
-      color: 0x951e20,
+      color: 0x8d8b4f,
       metalness: 0,
       roughness: 1,
       transparent: true,
@@ -383,33 +412,31 @@ imgURLs.forEach((url, i) => {
 
     const card = new THREE.Mesh(geo, [matFrontBack, matSides]);
 
-
     //Position this card in the circle
     const t = i / imgURLs.length;
     const angle = t * Math.PI * 2;
-
     const x = Math.sin(angle) * radius;
     const z = Math.cos(angle) * radius;
 
+    //Setup the orientation
     card.position.set(x, 0, z);
     card.lookAt(0, 0, 0);
     card.rotateY(Math.PI * 0.5);
 
-    // Add to carousel
+    //Add to carousel
     carousel.add(card);
 
-    //Marking card and push it to cards array
+    //Store cards
+    cards.push(card);
     card.userData.isCard = true;
-    cards.push(card)
-
   });
 });
 
 
 
 
-
-//BUTTON-----------------------------------------------------------------------------------
+// UI AND BUTTONS =========================================================================================================
+// ===== [SECTION] CLICK,TAP, TOUCH =====
 openBtn.addEventListener("click", () => {
   overlay.classList.toggle('open');
   overlay.classList.remove('close');
@@ -431,8 +458,3 @@ closeBtn.addEventListener("click", () => {
   spinImpulse = 0.05;
 
 });
-
-
-
-
-
