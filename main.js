@@ -69,10 +69,10 @@ let spinImpulse = 0;
 let spinBase   = 0.001; 
 const damping    = 0.99;
 
-//#region  camera animaion helper
+//CAMERA ANIMATION
 let isCameraAnimating = false;
 let camStartTime = 0;
-const camDuration = 3000;
+const camDuration = 1000;
 let camStart = new THREE.Vector3();
 let camEnd   = new THREE.Vector3(0, 0, 9);
 
@@ -87,11 +87,59 @@ let isSpinFrozen = false;
 let focusedCard = null;
 const cards = [];
 
-//Fade state
+//FADE STATE
 let fadeActive = false;
 let fadeStartTime = 0;
 const fadeDuration = 100; // ms
 let fadeDirection = null
+
+//CARD FLIP STATE
+let rotateActive = false;
+let rotateStartTime = 0;
+const rotateDuration = 300; // ms
+let rotateDirection = null; // "open" or "close"
+let rotatedCard = null;     // card currently being animated
+
+//CAROUSEL SPIN TO FRONT
+let isAutoSpinningToCard = false;
+let autoSpinStartTime = 0;
+const autoSpinDuration = 300; // ms – tweak for how long the spin takes
+let autoSpinStartAngle = 0;
+let autoSpinEndAngle = 0;
+let autoSpinTargetCard = null;
+//HELPER
+function startSpinToCard(card) {
+  autoSpinTargetCard = card;
+  isAutoSpinningToCard = true;
+  autoSpinStartTime = performance.now();
+
+  autoSpinStartAngle = carousel.rotation.y;
+
+  const p = card.position; // local position inside carousel
+  const localAngle = Math.atan2(p.x, p.z); // angle around Y
+
+  let targetAngle = -localAngle;
+
+  const twoPi = Math.PI * 2;
+  let delta = targetAngle - autoSpinStartAngle;
+  delta = ((delta + Math.PI) % twoPi + twoPi) - Math.PI;
+
+  autoSpinEndAngle = autoSpinStartAngle + delta;
+
+  isSpinFrozen = true;
+  spinImpulse = 0;  
+}
+
+const frontLabelEl = document.getElementById("front-label");
+
+const tmpWorldPos = new THREE.Vector3();
+const tmpWorldDir = new THREE.Vector3();
+const tmpToCam    = new THREE.Vector3();
+
+let currentFrontIndex = -1;
+
+
+
 
 
 
@@ -108,6 +156,9 @@ let fadeDirection = null
  */
 function tick(){
   const dt = clock.getDelta();
+  const now = performance.now();
+
+  
 
   // [CAMERA ANIM]
   if (isCameraAnimating) {
@@ -124,19 +175,8 @@ function tick(){
     }
   }
 
-  /*Spinning Animation
-  const spin = spinBase + spinImpulse;
-  carousel.rotation.y += spin;
-  spinImpulse *= damping;     */
 
-  // [SPIN] Update spinImpulse + apply to carousel
-  if (!isSpinFrozen) {
-    const spin = spinBase + spinImpulse;
-    carousel.rotation.y += spin;
-    spinImpulse *= damping;
-  } 
-
-  // [CARD RAYCAST] Fade when getting clicked
+  // [FADE CARDS]
   if (fadeActive) {
     const now = performance.now();
     const elapsed = now - fadeStartTime;
@@ -151,17 +191,118 @@ function tick(){
         }
       });
 
-    } else if (fadeDirection === "in") {
-      cards.forEach(mesh => {
-        setCardOpacity(mesh, t);
-      });
-    }
+    } else if (fadeDirection === "in" && focusedCard) {
+        cards.forEach(mesh => {
+          if (mesh === focusedCard) {
+            setCardOpacity(mesh, 1);      // never disappears
+          } else {
+            setCardOpacity(mesh, t);      // 0 → 1
+          }
+        });
+      }
 
     if (t === 1) {
       fadeActive = false;
-      fadeDirection = null;
+
+      // when fade IN is finished, we really reset focus
+      if (fadeDirection === "in") {
+        fadeDirection = null;
+        focusedCard = null;
+      }
     }
   }
+
+
+  //[CARD FLIP]
+  if (rotateActive && rotatedCard) {
+    const now = performance.now();
+    const elapsed = now - rotateStartTime;
+    const t = Math.min(elapsed / rotateDuration, 1);
+    // Smooth easing
+    const ease = 1 - Math.pow(1 - t, 3);
+    if (rotateDirection === "open") {
+      const start = rotatedCard.userData.originalRotationY;
+      const end = start + Math.PI * 0.5; // rotate +90°
+      rotatedCard.rotation.y = start + (end - start) * ease;
+    }
+    if (rotateDirection === "close") {
+      const end = rotatedCard.userData.originalRotationY;
+      const start = end + Math.PI * 0.5;
+      rotatedCard.rotation.y = start + (end - start) * ease;
+    }
+    if (t === 1) {
+      rotateActive = false;
+      // if fully closed, drop reference
+      if (rotateDirection === "close") {
+        rotatedCard = null;
+      }
+    }
+  }
+
+
+  // CAROUSEL SPIN
+  if (isAutoSpinningToCard && autoSpinTargetCard) {
+    const elapsed = now - autoSpinStartTime;
+    const t = Math.min(elapsed / autoSpinDuration, 1);
+
+    const ease = t < 0.5
+      ? 2 * t * t                 // accelerate
+      : 1 - Math.pow(-2 * t + 2, 2) / 2; // decelerate
+
+    carousel.rotation.y =
+      autoSpinStartAngle + (autoSpinEndAngle - autoSpinStartAngle) * ease;
+
+    if (t === 1) {
+      isAutoSpinningToCard = false;
+
+      focusCard(autoSpinTargetCard);
+    }
+  }
+
+
+  // [NORMAL SPIN]
+  if (!isSpinFrozen && !isAutoSpinningToCard) {
+    const spin = spinBase + spinImpulse; 
+    carousel.rotation.y += spin;
+    spinImpulse *= damping;
+  }
+
+
+    // ===== [SECTION] FRONT-MOST CARD LABEL =====
+    if (cards.length > 0 && frontLabelEl) {
+      let bestCard = null;
+      let bestScore = -Infinity;
+
+      cards.forEach(card => {
+        // get card position in world space
+        card.getWorldPosition(tmpWorldPos);
+
+        // direction from card -> camera
+        tmpToCam.subVectors(camera.position, tmpWorldPos).normalize();
+
+        // card's facing direction in world space
+        card.getWorldDirection(tmpWorldDir); // forward (-Z in local)
+        tmpWorldDir.negate(); // flip so it's "front" of the card
+
+        // alignment: 1 = looking straight at camera, 0 = sideways, -1 = away
+        const alignment = tmpToCam.dot(tmpWorldDir);
+
+        if (alignment > bestScore) {
+          bestScore = alignment;
+          bestCard = card;
+        }
+      });
+
+      if (bestCard) {
+        const idx = bestCard.userData.index;
+
+        // only update text when the front card actually changes
+        if (idx !== currentFrontIndex) {
+          currentFrontIndex = idx;
+          frontLabelEl.textContent = bestCard.userData.label;
+        }
+      }
+    }
 
 
   // [CONTROLS + RENDER]
@@ -200,25 +341,33 @@ function setCardOpacity(card, value) {
 }
 
 
-/**
- * [FOCUS] Focus a card:
- * - Freeze spin
- * - Remember focusedCard
- * - Fade out all others
- */
+// [FOCUS] Focus a card:
 function focusCard(card) {
   focusedCard = card;
   isSpinFrozen = true;
-  spinImpulse = 0; // or spinImpulse / spinBase = 0 if you use that pattern
+  spinImpulse = 0;
 
+  //CARD FLIP
+  // remember which card we are rotating
+  rotatedCard = card;
+  rotateActive = true;
+  rotateDirection = "open";
+  rotateStartTime = performance.now();
+
+  //FADING
   fadeActive = true;
   fadeDirection = "out"
   fadeStartTime = performance.now();
-
   // reset all cards to fully visible before fading
   cards.forEach(mesh => {
     setCardOpacity(mesh, 1);
   });
+
+  //CAMERA: move in to (0, 0, 4.5)
+  camStart.copy(camera.position);
+  camEnd.set(0, 0, 6.2);
+  camStartTime = Date.now();
+  isCameraAnimating = true;
 }
 
 
@@ -226,26 +375,28 @@ function focusCard(card) {
   * [RESET FOCUS] Get back to the previous state
 */
 function resetFocus() {
-  focusedCard = null;
+  if (!focusedCard) return;
+  //focusedCard = null;
   isSpinFrozen = false;
 
+  //FADING BACK IN
   fadeActive = true;
   fadeDirection = "in";
   fadeStartTime = performance.now();
+  
+  //CARD FLIP BACK
+  rotatedCard = focusedCard;
+  rotateActive = true;
+  rotateDirection = "close";
+  rotateStartTime = performance.now();
 
-  cards.forEach(mesh => {
-    setCardOpacity(mesh, 0);
-  });
+  // CAMERA: move out to (0, 0, 10)
+  camStart.copy(camera.position);
+  camEnd.set(0, 0, 10);
+  camStartTime = Date.now();
+  isCameraAnimating = true;
 
-  // OPTIONAL: give the spin a little kick again
-  // If you use a single spinV:
-  //spinImpulse = 0.01 // adjust to taste
-
-  // If you use spinBase/spinImpulse:
-  // spinBase = 0.003;
-  // spinImpulse = 0.0;
 }
-
 
 
 /**
@@ -270,12 +421,21 @@ function onPointerDown(event) {
     while (obj && !cards.includes(obj)) {
       obj = obj.parent;
     }
-    if (obj) {
-      focusCard(obj);
+
+    if (!obj) return;
+
+    if (focusedCard) {
+      // If we click the already focused card → reset
+      if (focusedCard === obj) {
+        resetFocus();
+      }
     }
+    startSpinToCard(obj);
+
   } else {
-    resetFocus();
+    if (focusedCard) resetFocus();
   }
+
 }
 renderer.domElement.addEventListener('pointerdown', onPointerDown);
 
@@ -428,7 +588,11 @@ imgURLs.forEach((url, i) => {
 
     //Store cards
     cards.push(card);
+    card.userData.angle = angle;
     card.userData.isCard = true;
+    card.userData.originalRotationY = card.rotation.y;
+    card.userData.index = i;
+    card.userData.label = `Photo ${i + 1}`; 
   });
 });
 
