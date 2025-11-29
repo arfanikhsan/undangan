@@ -72,7 +72,7 @@ const damping    = 0.99;
 //CAMERA ANIMATION
 let isCameraAnimating = false;
 let camStartTime = 0;
-const camDuration = 1000;
+const camDuration = 3000;
 let camStart = new THREE.Vector3();
 let camEnd   = new THREE.Vector3(0, 0, 9);
 
@@ -130,15 +130,6 @@ function startSpinToCard(card) {
   spinImpulse = 0;  
 }
 
-const frontLabelEl = document.getElementById("front-label");
-
-const tmpWorldPos = new THREE.Vector3();
-const tmpWorldDir = new THREE.Vector3();
-const tmpToCam    = new THREE.Vector3();
-
-let currentFrontIndex = -1;
-
-
 
 
 
@@ -157,8 +148,6 @@ let currentFrontIndex = -1;
 function tick(){
   const dt = clock.getDelta();
   const now = performance.now();
-
-  
 
   // [CAMERA ANIM]
   if (isCameraAnimating) {
@@ -268,43 +257,6 @@ function tick(){
   }
 
 
-    // ===== [SECTION] FRONT-MOST CARD LABEL =====
-    if (cards.length > 0 && frontLabelEl) {
-      let bestCard = null;
-      let bestScore = -Infinity;
-
-      cards.forEach(card => {
-        // get card position in world space
-        card.getWorldPosition(tmpWorldPos);
-
-        // direction from card -> camera
-        tmpToCam.subVectors(camera.position, tmpWorldPos).normalize();
-
-        // card's facing direction in world space
-        card.getWorldDirection(tmpWorldDir); // forward (-Z in local)
-        tmpWorldDir.negate(); // flip so it's "front" of the card
-
-        // alignment: 1 = looking straight at camera, 0 = sideways, -1 = away
-        const alignment = tmpToCam.dot(tmpWorldDir);
-
-        if (alignment > bestScore) {
-          bestScore = alignment;
-          bestCard = card;
-        }
-      });
-
-      if (bestCard) {
-        const idx = bestCard.userData.index;
-
-        // only update text when the front card actually changes
-        if (idx !== currentFrontIndex) {
-          currentFrontIndex = idx;
-          frontLabelEl.textContent = bestCard.userData.label;
-        }
-      }
-    }
-
-
   // [CONTROLS + RENDER]
   controls.update(); 
   renderer.render(scene, camera); 
@@ -350,6 +302,7 @@ function focusCard(card) {
   //CARD FLIP
   // remember which card we are rotating
   rotatedCard = card;
+  // start rotation animation
   rotateActive = true;
   rotateDirection = "open";
   rotateStartTime = performance.now();
@@ -362,12 +315,6 @@ function focusCard(card) {
   cards.forEach(mesh => {
     setCardOpacity(mesh, 1);
   });
-
-  //CAMERA: move in to (0, 0, 4.5)
-  camStart.copy(camera.position);
-  camEnd.set(0, 0, 6.2);
-  camStartTime = Date.now();
-  isCameraAnimating = true;
 }
 
 
@@ -389,12 +336,6 @@ function resetFocus() {
   rotateActive = true;
   rotateDirection = "close";
   rotateStartTime = performance.now();
-
-  // CAMERA: move out to (0, 0, 10)
-  camStart.copy(camera.position);
-  camEnd.set(0, 0, 10);
-  camStartTime = Date.now();
-  isCameraAnimating = true;
 
 }
 
@@ -591,8 +532,6 @@ imgURLs.forEach((url, i) => {
     card.userData.angle = angle;
     card.userData.isCard = true;
     card.userData.originalRotationY = card.rotation.y;
-    card.userData.index = i;
-    card.userData.label = `Photo ${i + 1}`; 
   });
 });
 
