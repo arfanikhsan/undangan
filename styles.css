@@ -46,6 +46,7 @@ canvas { touch-action: none; }
 
 html, body {
   height: 100%;
+  width: 100;
   margin: 0;
   padding: 0;
   background: #fff8e8;
@@ -348,7 +349,7 @@ canvas {
   background-color: #8d8b4f;
   transform: translate(-50%, -50%);
   left: 50%;
-  bottom: -85vh;
+  bottom: -82vh;
   width: 70%;
   height: 7vh;
   cursor: pointer;
@@ -463,13 +464,26 @@ canvas {
 }
 */
 
-
+.front-label {
+  position: fixed;
+  left: 50%;
+  bottom: 25vh;
+  transform: translateX(-50%);
+  font-family: 'DMMono-Regular', monospace;
+  font-size: 12pt;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #dbd4bf;
+  pointer-events: none;
+}
 /* LANDING */
 /* Styles for the anchor tag wrapper */
 .div-link {
     text-decoration: none; /* Removes default link underline */
     color: inherit; /* Inherits color from parent or default text color */
 }
+
+
 
 .landing{
   display: flex;
@@ -502,32 +516,61 @@ canvas {
   justify-content: flex-start;
   align-items: center;
   height: 100vh;
-  background-color: rgb(255, 255, 255);
-  text-align: center
+  width: 100vw;
 }
 
 
 .full .running-text-1{
   width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
 }
 h2{
   font-family:  'Atype';
-  white-space: nowrap;
   font-size: 24pt;
   margin: 0;
   color: #8d8b4f;
+  text-align: center;
+  
 }
+
+
+
 .gama{
   height: 40%;
   background-color: yellow;
-  margin-top: 10%;
   padding: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding-left: 10vw;
 }
-
-.asti{
-  height: 40%;
-  background-color: yellow;
-  margin-top: 10%;
-  padding: 0;  
+.pic{
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
-
+.pic-gama{
+  background-image: url('images/GM26-GAMA.webp');
+  background-size: cover;
+  background-position: center;
+  width: 150px;
+  height: 200px;
+}
+.caption-gama{
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding-left: vw;
+  padding-right: 15vw;
+  width: 50%;
+}
+.gama h1{
+  font-size: 20pt;
+  text-align: left;
+  margin: 0;
+}
