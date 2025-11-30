@@ -72,7 +72,7 @@ const damping    = 0.99;
 //CAMERA ANIMATION
 let isCameraAnimating = false;
 let camStartTime = 0;
-const camDuration = 3000;
+const camDuration = 500;
 let camStart = new THREE.Vector3();
 let camEnd   = new THREE.Vector3(0, 0, 9);
 
@@ -96,7 +96,7 @@ let fadeDirection = null
 //CARD FLIP STATE
 let rotateActive = false;
 let rotateStartTime = 0;
-const rotateDuration = 300; // ms
+const rotateDuration = 500; // ms
 let rotateDirection = null; // "open" or "close"
 let rotatedCard = null;     // card currently being animated
 
@@ -130,6 +130,15 @@ function startSpinToCard(card) {
   spinImpulse = 0;  
 }
 
+const frontLabelEl = document.getElementById("front-label");
+
+const tmpWorldPos = new THREE.Vector3();
+const tmpWorldDir = new THREE.Vector3();
+const tmpToCam    = new THREE.Vector3();
+
+let currentFrontIndex = -1;
+
+
 
 
 
@@ -148,6 +157,8 @@ function startSpinToCard(card) {
 function tick(){
   const dt = clock.getDelta();
   const now = performance.now();
+
+  
 
   // [CAMERA ANIM]
   if (isCameraAnimating) {
@@ -257,6 +268,43 @@ function tick(){
   }
 
 
+    // ===== [SECTION] FRONT-MOST CARD LABEL =====
+    if (cards.length > 0 && frontLabelEl) {
+      let bestCard = null;
+      let bestScore = -Infinity;
+
+      cards.forEach(card => {
+        // get card position in world space
+        card.getWorldPosition(tmpWorldPos);
+
+        // direction from card -> camera
+        tmpToCam.subVectors(camera.position, tmpWorldPos).normalize();
+
+        // card's facing direction in world space
+        card.getWorldDirection(tmpWorldDir); // forward (-Z in local)
+        tmpWorldDir.negate(); // flip so it's "front" of the card
+
+        // alignment: 1 = looking straight at camera, 0 = sideways, -1 = away
+        const alignment = tmpToCam.dot(tmpWorldDir);
+
+        if (alignment > bestScore) {
+          bestScore = alignment;
+          bestCard = card;
+        }
+      });
+
+      if (bestCard) {
+        const idx = bestCard.userData.index;
+
+        // only update text when the front card actually changes
+        if (idx !== currentFrontIndex) {
+          currentFrontIndex = idx;
+          frontLabelEl.textContent = bestCard.userData.label;
+        }
+      }
+    }
+
+
   // [CONTROLS + RENDER]
   controls.update(); 
   renderer.render(scene, camera); 
@@ -302,7 +350,6 @@ function focusCard(card) {
   //CARD FLIP
   // remember which card we are rotating
   rotatedCard = card;
-  // start rotation animation
   rotateActive = true;
   rotateDirection = "open";
   rotateStartTime = performance.now();
@@ -315,6 +362,12 @@ function focusCard(card) {
   cards.forEach(mesh => {
     setCardOpacity(mesh, 1);
   });
+
+  //CAMERA: move in to (0, 0, 4.5)
+  camStart.copy(camera.position);
+  camEnd.set(0, 0, 6.2);
+  camStartTime = Date.now();
+  isCameraAnimating = true;
 }
 
 
@@ -336,6 +389,12 @@ function resetFocus() {
   rotateActive = true;
   rotateDirection = "close";
   rotateStartTime = performance.now();
+
+  // CAMERA: move out to (0, 0, 10)
+  camStart.copy(camera.position);
+  camEnd.set(0, 0, 10);
+  camStartTime = Date.now();
+  isCameraAnimating = true;
 
 }
 
@@ -370,6 +429,7 @@ function onPointerDown(event) {
       if (focusedCard === obj) {
         resetFocus();
       }
+      return
     }
     startSpinToCard(obj);
 
@@ -393,6 +453,11 @@ const openBtn  = document.getElementById("open-btn");
 const closeBtn  = document.getElementById("close-btn");
 const overlayProgressBar = document.getElementById("overlay-progress-bar");
 
+const mainPage = document.getElementById('main-page');
+const openInvitation = document.getElementById('open-invitation');
+const landingOn = document.getElementById('page-two-wrapper');
+const goUpBtn = document.getElementById('go-up');
+
 /** [LOADER] Start */
 loadingManager.onStart = (url, loaded, total) => {
   loaderStatus.textContent = "LOADING ASSETS . . . 0%";
@@ -406,6 +471,9 @@ loadingManager.onProgress = (url, loaded, total) => {
 };
 /** [LOADER] Finished */
 loadingManager.onLoad = () => {
+  //Opening the landing page on load
+  landingOn.disabled =true;
+
   loaderStatus.textContent = "OPEN INVITATION";
   openBtn.disabled = false;
 
@@ -532,6 +600,8 @@ imgURLs.forEach((url, i) => {
     card.userData.angle = angle;
     card.userData.isCard = true;
     card.userData.originalRotationY = card.rotation.y;
+    card.userData.index = i;
+    card.userData.label = `Photo ${i + 1}`; 
   });
 });
 
@@ -554,10 +624,120 @@ openBtn.addEventListener("click", () => {
   isCameraAnimating = true;
 });
 
+/*
 closeBtn.addEventListener("click", () => {
   overlay.classList.toggle('close');
   overlay.classList.remove('open');
 
   spinImpulse = 0.05;
 
-});
+});*/
+
+
+
+
+/*
+openInvitation.addEventListener("click", openPageTwo);
+goUpBtn.addEventListener("click", lockAndReturnToPageOne);
+*/
+
+openInvitation.addEventListener("click",() => {
+    console.log("test click");
+    mainPage.classList.toggle('close');
+    landingOn.classList.toggle('show');
+    landingOn.classList.remove('hidden')
+
+
+})
+/**
+function openPageTwo(){
+    // Hide Page 1
+
+    pageOne.style.transform = 'translateY(-100%)';
+    
+    // Show and enable scrolling for Page 2
+    pageTwoWrapper.classList.add('page-two-active');
+    spinImpulse = 0.05;
+}
+function lockAndReturnToPageOne() {
+    // 1. Scroll Page 2's content back to the top (smoothly)
+    pageTwoWrapper.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+
+    // 2. Wait for the scroll to finish, then switch views
+    setTimeout(() => {
+        // Hide Page 2 and disable its scrolling
+        pageTwoWrapper.classList.remove('page-two-active');
+        
+        // Show Page 1
+        pageOne.style.opacity = '1';
+        pageOne.style.transform = 'translateY(0)';
+    }, 500); // Matching the smooth scroll duration
+}
+
+window.onload = () => {
+      pageOne.style.opacity = '1';
+      pageOne.style.transform = 'translateY(0)';
+      pageTwoWrapper.classList.remove('page-two-active');
+};
+*/
+/*
+function openPageTwo() {
+    // Hide Page 1
+    pageOne.style.opacity = '0';
+    pageOne.style.transform = 'translateY(100%)';
+    
+    // Show and enable scrolling for Page 2
+    pageTwoWrapper.classList.add('page-two-active');
+}
+
+/**
+ * Scrolls Page 2 to the top, then switches the view back to Page 1.
+ */
+/*
+function lockAndReturnToPageOne() {
+    // 1. Scroll Page 2's content back to the top (smoothly)
+    pageTwoWrapper.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+
+    // 2. Wait for the scroll to finish, then switch views
+    setTimeout(() => {
+        // Hide Page 2 and disable its scrolling
+        pageTwoWrapper.classList.remove('page-two-active');
+        
+        // Show Page 1
+        pageOne.style.opacity = '1';
+        pageOne.style.transform = 'translateY(0)';
+    }, 500); // Matching the smooth scroll duration
+}
+
+// Initial setup on load to ensure Page 1 is visible and Page 2 is hidden
+window.onload = () => {
+      pageOne.style.opacity = '1';
+      pageOne.style.transform = 'translateY(0)';
+      pageTwoWrapper.classList.remove('page-two-active');
+};
+
+*/
+
+
+
+
+
+//link query
+  const headingId = 'output';
+  
+  // Define the key name you'll use in the URL (e.g., '?q=Hello')
+  const urlKey = 'q'; 
+
+  //Get the value of the 'q' parameter from the URL query string
+  const textFromURL = new URLSearchParams(window.location.search).get(urlKey);
+
+  // Update the H1's content if the parameter exists
+  if (textFromURL) {
+      document.getElementById(headingId).textContent = textFromURL;
+  }
