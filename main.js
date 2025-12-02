@@ -39,7 +39,7 @@ const scene  = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
   65, //FOV
   canvasWidth/canvasHeight,  //Scene aspect
-  0.1, //Near clipping
+  0.1, //Near clipping  
   200); //Far clipping
 camera.position.set(0, 20, 0);
 onResize(); 
@@ -47,7 +47,7 @@ onResize();
 // ===== [SECTION] LIGHTING =====
 const amb = new THREE.AmbientLight(0xffffff, 0.7);
 const dir = new THREE.DirectionalLight(0xffffff, 1);
-dir.position.set(2, 3, 2);
+dir.position.set(1, 4, 4);
 scene.add(amb, dir);
 
 
@@ -67,14 +67,14 @@ scene.add(carousel);
 //#region Spin state
 let spinImpulse = 0;      
 let spinBase   = 0.001; 
-const damping    = 0.99;
+const damping    = 0.98;
 
 //CAMERA ANIMATION
 let isCameraAnimating = false;
 let camStartTime = 0;
-const camDuration = 500;
+const camDuration = 1000;
 let camStart = new THREE.Vector3();
-let camEnd   = new THREE.Vector3(0, 0, 9);
+let camEnd   = new THREE.Vector3(0, 0, 8);
 
 //#region Raycaster
 const raycaster = new THREE.Raycaster();
@@ -90,8 +90,12 @@ const cards = [];
 //FADE STATE
 let fadeActive = false;
 let fadeStartTime = 0;
-const fadeDuration = 100; // ms
+const fadeDuration = 500; // ms
 let fadeDirection = null
+
+//HTML ELEMENT FADE
+const containerOne = document.getElementById('container-1');
+const containerTwo = document.getElementById('container-2');
 
 //CARD FLIP STATE
 let rotateActive = false;
@@ -347,6 +351,11 @@ function focusCard(card) {
   isSpinFrozen = true;
   spinImpulse = 0;
 
+  //SHOW CAPTION
+  const captionEl = document.getElementById("card-caption");
+  captionEl.textContent = card.userData.caption || `Card ${card.userData.index}`;
+  captionEl.style.opacity = 1;
+
   //CARD FLIP
   // remember which card we are rotating
   rotatedCard = card;
@@ -365,7 +374,7 @@ function focusCard(card) {
 
   //CAMERA: move in to (0, 0, 4.5)
   camStart.copy(camera.position);
-  camEnd.set(0, 0, 6.2);
+  camEnd.set(0, 0, 6);
   camStartTime = Date.now();
   isCameraAnimating = true;
 }
@@ -392,9 +401,17 @@ function resetFocus() {
 
   // CAMERA: move out to (0, 0, 10)
   camStart.copy(camera.position);
-  camEnd.set(0, 0, 10);
+  camEnd.set(0, 0, 8);
   camStartTime = Date.now();
   isCameraAnimating = true;
+
+  //HIDE CAPTION
+  document.getElementById("card-caption").style.opacity = 0
+  if (t === 1) {
+  fadeActive = false;
+  fadeDirection = null;
+  focusedCard = null;
+}
 
 }
 
@@ -601,7 +618,48 @@ imgURLs.forEach((url, i) => {
     card.userData.isCard = true;
     card.userData.originalRotationY = card.rotation.y;
     card.userData.index = i;
-    card.userData.label = `Photo ${i + 1}`; 
+    card.userData.label = `photo${i + 1}`; 
+    
+    const caption =[
+
+
+
+
+
+   
+
+
+
+
+
+
+
+"When we first began, we were figuring things out with uncertainty, yet with so much joy",
+"When we first began, we were figuring things out with uncertainty, yet with so much joy",
+"When we first began, we were figuring things out with uncertainty, yet with so much joy",
+"When we first began, we were figuring things out with uncertainty, yet with so much joy",
+"Where his journey started, shaped by the years that carried him here",
+"Where his journey started, shaped by the years that carried him here",
+"Where his journey started, shaped by the years that carried him here",
+"Where his journey started, shaped by the years that carried him here",
+"Where her story began, the pieces of time that shaped who she is today",
+"Where her story began, the pieces of time that shaped who she is today",
+"Where her story began, the pieces of time that shaped who she is today",
+"Where her story began, the pieces of time that shaped who she is today",
+"After all the seasons we lived through, this is where time has brought us",
+"After all the seasons we lived through, this is where time has brought us",
+"After all the seasons we lived through, this is where time has brought us",
+"After all the seasons we lived through, this is where time has brought us",
+
+"Ahead lies time we will walk into, a time when we will keep growing and changing",
+      
+"Time moved, and so did we, learning, changing, growing in our own ways, even miles apart",
+"Time moved, and so did we, learning, changing, growing in our own ways, even miles apart",      
+"Time moved, and so did we, learning, changing, growing in our own ways, even miles apart",      
+"Time moved, and so did we, learning, changing, growing in our own ways, even miles apart",
+
+    ]
+    card.userData.caption = caption[i];
   });
 });
 
@@ -642,23 +700,26 @@ goUpBtn.addEventListener("click", lockAndReturnToPageOne);
 */
 
 openInvitation.addEventListener("click",() => {
-    console.log("test click");
-    mainPage.classList.toggle('close');
-    landingOn.classList.toggle('show');
-    landingOn.classList.remove('hidden')
-
-
+  mainPage.style.transform = 'translateY(-100%)';
+  landingOn.classList.toggle('show');
+  spinImpulse = 0.05;
 })
-/**
-function openPageTwo(){
-    // Hide Page 1
 
-    pageOne.style.transform = 'translateY(-100%)';
-    
-    // Show and enable scrolling for Page 2
-    pageTwoWrapper.classList.add('page-two-active');
-    spinImpulse = 0.05;
-}
+goUpBtn.addEventListener("click",() => {
+  window.scrollTo({
+    top:  0,
+    behavior: 'smooth' // Makes the scroll animated rather than an instant jump
+  });
+  mainPage.style.transform = 'translateY(0%)'
+  setTimeout(() => {
+  landingOn.classList.toggle('show');
+  }, 2000);
+  spinImpulse = 0.1;
+})
+
+
+/**
+
 function lockAndReturnToPageOne() {
     // 1. Scroll Page 2's content back to the top (smoothly)
     pageTwoWrapper.scrollTo({
