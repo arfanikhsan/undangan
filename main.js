@@ -650,9 +650,10 @@ imgURLs.forEach((url, i) => {
 "After all the seasons we lived through, this is where time has brought us",
 "After all the seasons we lived through, this is where time has brought us",
 "After all the seasons we lived through, this is where time has brought us",
-
 "Ahead lies time we will walk into, a time when we will keep growing and changing",
-      
+"Ahead lies time we will walk into, a time when we will keep growing and changing",
+"Ahead lies time we will walk into, a time when we will keep growing and changing",
+"Ahead lies time we will walk into, a time when we will keep growing and changing",
 "Time moved, and so did we, learning, changing, growing in our own ways, even miles apart",
 "Time moved, and so did we, learning, changing, growing in our own ways, even miles apart",      
 "Time moved, and so did we, learning, changing, growing in our own ways, even miles apart",      
@@ -802,3 +803,4 @@ window.onload = () => {
   if (textFromURL) {
       document.getElementById(headingId).textContent = textFromURL;
   }
+
