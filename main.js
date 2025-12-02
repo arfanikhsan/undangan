@@ -66,7 +66,7 @@ scene.add(carousel);
 
 //#region Spin state
 let spinImpulse = 0;      
-let spinBase   = 0.001; 
+let spinBase   = 0.003; 
 const damping    = 0.98;
 
 //CAMERA ANIMATION
@@ -803,4 +803,5 @@ window.onload = () => {
   if (textFromURL) {
       document.getElementById(headingId).textContent = textFromURL;
   }
+
 
