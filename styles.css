@@ -715,7 +715,7 @@ canvas {
 #section-two h3{
   font-family: 'BaiJamjuree-Light', sans-serif;
   font-size: 11.5pt;
-  padding-top: 7pt;
+  padding-top: 5%;
   font-kerning: none;
   margin: 0;
 }
@@ -759,6 +759,16 @@ canvas {
 }
 .page2-parent2 .address{
   margin: 0 10px;
+}
+.page2-parent2 .QR a{
+  margin: 0;
+  display: flex;
+  justify-content: center;
+}
+.page2-parent2 .QR{
+  margin: 0;
+  display: flex;
+  justify-content: center;
 }
 .page2-parent2 .QR img{
   width: 100px;
