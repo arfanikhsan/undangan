@@ -66,7 +66,7 @@ scene.add(carousel);
 
 //#region Spin state
 let spinImpulse = 0;      
-let spinBase   = 0.003; 
+let spinBase   = 0.001; 
 const damping    = 0.98;
 
 //CAMERA ANIMATION
@@ -475,6 +475,17 @@ const openInvitation = document.getElementById('open-invitation');
 const landingOn = document.getElementById('page-two-wrapper');
 const goUpBtn = document.getElementById('go-up');
 
+// Add a timeout fallback (10 seconds)
+let loadTimeoutId = null;
+function forceLoadComplete() {
+  if (loadTimeoutId !== null) {
+    clearTimeout(loadTimeoutId);
+  }
+  // Trigger onLoad manually
+  loadingManager.onLoad();
+}
+loadTimeoutId = setTimeout(forceLoadComplete, 10000); // 10 seconds
+
 /** [LOADER] Start */
 loadingManager.onStart = (url, loaded, total) => {
   loaderStatus.textContent = "LOADING ASSETS . . . 0%";
@@ -488,9 +499,14 @@ loadingManager.onProgress = (url, loaded, total) => {
 };
 /** [LOADER] Finished */
 loadingManager.onLoad = () => {
+  // Clear the timeout since loading finished normally
+  if (loadTimeoutId !== null) {
+    clearTimeout(loadTimeoutId);
+    loadTimeoutId = null;
+  }
+
   //Opening the landing page on load
   landingOn.disabled =true;
-
   loaderStatus.textContent = "OPEN INVITATION";
   openBtn.disabled = false;
 
@@ -501,10 +517,7 @@ loadingManager.onLoad = () => {
   // wait 5 seconds before showing an active OPEN button
   setTimeout(() => {
     loaderStatus.textContent = "OPEN INVITATION";
-    openBtn.disabled = false;          // button becomes clickable
-    // optional visual cues:
-    // openBtn.style.opacity = "1";
-    // openBtn.style.pointerEvents = "auto";
+    openBtn.disabled = false;
   }, 5000);
 };
 
@@ -650,10 +663,9 @@ imgURLs.forEach((url, i) => {
 "After all the seasons we lived through, this is where time has brought us",
 "After all the seasons we lived through, this is where time has brought us",
 "After all the seasons we lived through, this is where time has brought us",
+
 "Ahead lies time we will walk into, a time when we will keep growing and changing",
-"Ahead lies time we will walk into, a time when we will keep growing and changing",
-"Ahead lies time we will walk into, a time when we will keep growing and changing",
-"Ahead lies time we will walk into, a time when we will keep growing and changing",
+      
 "Time moved, and so did we, learning, changing, growing in our own ways, even miles apart",
 "Time moved, and so did we, learning, changing, growing in our own ways, even miles apart",      
 "Time moved, and so did we, learning, changing, growing in our own ways, even miles apart",      
@@ -803,5 +815,3 @@ window.onload = () => {
   if (textFromURL) {
       document.getElementById(headingId).textContent = textFromURL;
   }
-
-
