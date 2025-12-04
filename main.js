@@ -134,15 +134,56 @@ function startSpinToCard(card) {
   spinImpulse = 0;  
 }
 
+//CAPTION RELAED TO THE IMAGE
 const frontLabelEl = document.getElementById("front-label");
-
 const tmpWorldPos = new THREE.Vector3();
 const tmpWorldDir = new THREE.Vector3();
 const tmpToCam    = new THREE.Vector3();
-
 let currentFrontIndex = -1;
 
+//INTERACTIVE GESTURES
+// gesture state
+let isPointerDown = false;
+let downX = 0;
+let downY = 0;
+let lastX = 0;
+let lastY = 0;
+let downTime = 0;
 
+// thresholds (tweak to taste)
+const TAP_MAX_MOVE = 5;      // px - movement must stay under this to count as a tap
+const TAP_MAX_TIME = 250;    // ms - short press
+const HOLD_MIN_TIME = 350;   // ms - hold+drag focus threshold
+const SWIPE_MIN_MOVE = 20;   // px - large move in short time = swipe
+// Helper
+function getCardUnderPointer(clientX, clientY) {
+  const rect = renderer.domElement.getBoundingClientRect();
+
+  const x = ((clientX - rect.left) / rect.width) * 2 - 1;
+  const y = -((clientY - rect.top) / rect.height) * 2 + 1;
+
+  pointer.set(x, y);
+  raycaster.setFromCamera(pointer, camera);
+  const intersects = raycaster.intersectObjects(cards, true);
+    if (intersects.length > 0) {
+      let obj = intersects[0].object;
+
+      while (obj && !cards.includes(obj)) {
+        obj = obj.parent;
+      }
+      if (!obj) return;
+
+      if (focusedCard) {
+        if (focusedCard === obj) {
+          resetFocus();
+        }
+        return
+      }
+      startSpinToCard(obj);
+    } else {
+      if (focusedCard) resetFocus();
+    }
+}
 
 
 
@@ -407,6 +448,7 @@ function resetFocus() {
 
   //HIDE CAPTION
   document.getElementById("card-caption").style.opacity = 0
+  let t = 0;
   if (t === 1) {
   fadeActive = false;
   fadeDirection = null;
@@ -419,43 +461,80 @@ function resetFocus() {
 /**
  * [INPUT] Pointer down handler: raycast to cards and focus if hit.
  */
-function onPointerDown(event) {
-  const rect = renderer.domElement.getBoundingClientRect();
+function onPointerDown(e) {
+  isPointerDown = true;
 
-  const clientX = event.touches ? event.touches[0].clientX : event.clientX;
-  const clientY = event.touches ? event.touches[0].clientY : event.clientY;
+  const touch = e.touches ? e.touches[0] : e;
+  downX = lastX = touch.clientX;
+  downY = lastY = touch.clientY;
+  downTime = performance.now();
+}
 
-  pointer.x = ((clientX - rect.left) / rect.width) * 2 - 1;
-  pointer.y = -((clientY - rect.top) / rect.height) * 2 + 1;
+function onPointerMove(e) {
+  if (!isPointerDown) return;
 
-  raycaster.setFromCamera(pointer, camera);
-  
-  const intersects = raycaster.intersectObjects(cards);//Returns a sorted array with closest hit firs
+  const touch = e.touches ? e.touches[0] : e;
+  lastX = touch.clientX;
+  lastY = touch.clientY;
 
-  if (intersects.length > 0) {
-    let obj = intersects[0].object;
+  // we don't do anything special here;
+  // OrbitControls will handle drag rotation as usual
+}
 
-    while (obj && !cards.includes(obj)) {
-      obj = obj.parent;
+function onPointerUp(e) {
+  if (!isPointerDown) return;
+  isPointerDown = false;
+
+  const touch = e.changedTouches ? e.changedTouches[0] : e;
+  const upX = touch.clientX;
+  const upY = touch.clientY;
+
+  const dx = upX - downX;
+  const dy = upY - downY;
+  const dist = Math.hypot(dx, dy);
+
+  const now = performance.now();
+  const dt = now - downTime;
+
+  const card = getCardUnderPointer(upX, upY);
+
+  // --- CASE 1: simple TAP (short + tiny movement) ---
+  if (dist < TAP_MAX_MOVE && dt < TAP_MAX_TIME) {
+    if (card) {
+      focusCard(card);
+    } else if (focusedCard) {
+      // tap background to reset focus
+      resetFocus();
     }
-
-    if (!obj) return;
-
-    if (focusedCard) {
-      // If we click the already focused card → reset
-      if (focusedCard === obj) {
-        resetFocus();
-      }
-      return
-    }
-    startSpinToCard(obj);
-
-  } else {
-    if (focusedCard) resetFocus();
+    return;
   }
 
+  // --- CASE 2: HOLD + DRAG + RELEASE (slow) → focus on release ---
+  if (dt > HOLD_MIN_TIME && card) {
+    // treat as "deliberate" selection after manipulating view
+    focusCard(card);
+    return;
+  }
+
+  // --- CASE 3: quick SWIPE / FLICK ---
+  // large movement, short-ish time → spin only, NO focus
+  if (dist > SWIPE_MIN_MOVE && dt < 600) {
+    // do nothing special here — OrbitControls already spun the scene,
+    // and we intentionally do NOT call focusCard
+    return;
+  }
+
+  // fallback: if nothing matched and we had a focused card, you can decide:
+  // resetFocus() or do nothing. I'd recommend: do nothing.
 }
-renderer.domElement.addEventListener('pointerdown', onPointerDown);
+const dom = renderer.domElement;
+
+dom.addEventListener("pointerdown", onPointerDown);
+dom.addEventListener("pointermove", onPointerMove);
+dom.addEventListener("pointerup", onPointerUp);
+
+// for touchend on some browsers:
+dom.addEventListener("pointercancel", onPointerUp);
 
 
 
