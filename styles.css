@@ -74,6 +74,7 @@ html, body {
     margin: 0;
     font-size: 10pt;
     font-family: 'DMMono-light', monospace;
+    letter-spacing: 0.5pt;
 }
 
 /* Centered content */
@@ -186,7 +187,7 @@ html, body {
   padding: 0 0 1rem 0;
 }
 .container-3 .wellcome-text  h1{
-    padding-top: 10pt;
+    padding-top:3pt;
     color: #fff8e8;
 }
 
@@ -199,11 +200,18 @@ html, body {
   justify-content: center; /* Centers h1 horizontally */
   align-items: center;
 }
+#open-btn h1{
+  color: #951e20;
+  text-align: center;
+  font-family: 'DMMono', monospace;
+  font-size: 10pt;
+  letter-spacing: 0.5pt;
+}
 #open-btn .loader-base-color{
-  color: #d39087;
+  color: #951f20;
 }
 #open-btn .loader-update-color{
-  color: #951e20;
+  color: #951f20;
 }
 /* Progress bar container */
 #overlay-progress {
@@ -305,20 +313,22 @@ transform: translate(0, -100%);
   position: relative;
   width: 100%;
   height: 50%;
-
   display: flex;
   justify-content: flex-start;
   align-items:center;  
   flex-direction: column;
+  line-height: 12pt;
 }
-.test-upper-2 p{
+.test-upper-2 h3{
   text-align: center;
-  font-family: 'DMMono-light';
-  padding: 0;
   margin: 0;
   width: 100%; 
-  color: #dbd4bf;
-  font-size: 9pt;
+  color: #473e26;
+  font-family: 'BaiJamjuree', sans-serif;
+  font-size: 10pt;
+  font-kerning: none;
+  letter-spacing: 0.5pt;
+  
 }
 .test-1{
   position: relative;
@@ -360,12 +370,13 @@ transform: translate(0, -100%);
 
 #open-invitation h1 {
   text-align: center;
-  font-family: 'DMMono-light', monospace;
+  font-family: 'DMMono', monospace;
   font-size: 10pt;
   padding: 0;
   margin: 0;
   width: 100%; /* Retained */
   color: #fff8e8;
+  letter-spacing: 0.5pt;
 }
 
 .test-2 .line{
@@ -552,14 +563,13 @@ canvas {
   margin-bottom: 10%;
 }
 #section-zero .page0-parent1 h1{
-  font-family: 'BaiJamjuree-Light', sans-serif;
+  font-family: 'BaiJamjuree', sans-serif;
   font-size: 11.5pt;
-
   text-align: center;
   margin: 0;
-  color: #8d8b4f;
-  padding-top: 7pt;
-  font-kerning: none;
+  color: #473e26;
+  padding-top: 2pt;
+  letter-spacing: 0.5pt;
 }
 
 
@@ -585,7 +595,8 @@ canvas {
 }
 .page1-parent2 h1{
   font-family: 'BaiJamjuree-Light', sans-serif;
-  font-size: 20pt;
+  font-size: 25pt;
+  letter-spacing: 1pt;
 }
 .page1-parent2 p{
   font-family: 'BaiJamjuree-Light', sans-serif;
@@ -621,18 +632,20 @@ canvas {
   height: 100%;
   text-align: left;
   padding-left: 5%;
-  color: #8d8b4f;
+  color: #473e26;
 }
 .page1-parent2 .box1 .caption h1{
-  font-family: 'DMMono-Light', monospace;
+  font-family: 'DMMono-medium', monospace;
   margin: 0;
   padding-bottom: 5px;
 }
 .page1-parent2 .box1 .caption p{
-  font-family: 'DMMono-Light';
-  font-size: 7pt;
-  margin: 0;
-  padding-bottom: 5px;
+    font-family: 'BaiJamjuree', sans-serif;
+    font-size: 8pt;
+    margin: 0;
+    letter-spacing: 0.5pt;
+    color: #473e26;
+    font-weight: 600;
 }
 
 .page1-parent2 .box2{
@@ -663,27 +676,30 @@ canvas {
   height: 100%;
   text-align: right;
   padding-right: 5%;
-  color: #8d8b4f;
+  color: #473e26;
 }
 .page1-parent2 .box2 .caption h4{
+  text-align: right;
   font-family: 'DMMono-Light', monospace;
   font-weight: 100;
-  font-size: 80pt;
+  font-size: 90pt;
   color: #e5d3b5;
   position:absolute;
-  transform: translateX(100%);
+  transform: translateY(-5%);
 
 }
 .page1-parent2 .box2 .caption h1{
-  font-family: 'DMMono-Light', monospace;
+  font-family: 'DMMono-Medium', monospace;
   margin: 0;
   padding-bottom: 5px;
 }
 .page1-parent2 .box2 .caption p{
-  font-family: 'DMMono-Light';
-  font-size: 7pt;
-  margin: 0;
-  padding-bottom: 5px;
+    font-family: 'BaiJamjuree', sans-serif;
+    font-size: 8pt;
+    margin: 0;
+    letter-spacing: 0.5pt;
+    color: #473e26;
+    font-weight: 600;
 }
 
 
@@ -699,30 +715,34 @@ canvas {
     height: auto;
     margin: 0;
     padding: 0;
-    color:  #8d8b4f;
+    color:  #473e26;
 }
 
 #section-two h1{
-  font-family: 'DMMono-Light', monospace;
+  font-family: 'DMMono-Medium', monospace;
+  font-size: 25pt;
+  margin: 0;
+  letter-spacing: 1pt;
+}
+#section-two h2{
+  font-family: 'DMMono-Medium', monospace;
   font-size: 20pt;
   margin: 0;
 }
-#section-two h2{
-  font-family: 'DMMono-Light', monospace;
-  font-size: 15pt;
-  margin: 0;
-}
 #section-two h3{
-  font-family: 'BaiJamjuree-Light', sans-serif;
+  font-family: 'BaiJamjuree', sans-serif;
   font-size: 11.5pt;
-  padding-top: 5%;
   font-kerning: none;
   margin: 0;
+  letter-spacing: 0.5pt;
 }
 #section-two p{
-  font-family: 'BaiJamjuree-Light', sans-serif;
-  font-size: 7pt;
+  font-family: 'BaiJamjuree', sans-serif;
+  font-size: 8pt;
   margin: 0;
+  letter-spacing: 0.5pt;
+  color: #473e26;
+  font-weight: 600;
 }
 
 .page2-parent1{
@@ -773,7 +793,7 @@ canvas {
 .page2-parent2 .QR img{
   width: 100px;
   height: 100px;
-  margin-top: 10px;
+  margin-top: 15pt;
   margin-bottom: 10px;
 }
 .page2-parent2 .caption{
@@ -795,8 +815,14 @@ canvas {
 .page2-parent3 .matrimony{
   width: 100%;
 }
+.page2-parent3 .matrimony h3{
+  padding-bottom: 2pt;
+}
 .page2-parent3 .celebration{
   margin: 10px 0;
+}
+.page2-parent3 .celebration h3{
+  padding-bottom: 2pt;
 }
 .page2-parent3 .notes{
   width: 70%;
@@ -822,20 +848,22 @@ canvas {
 #section-three .box-1 p{
   font-family:'BaiJamjuree', sans-serif;
   font-size: 11.5pt;
+  letter-spacing: 0.5pt;
   margin: 0;
+  color: #473e26;
 }
 #section-three .box2{
   width: 80%;
-  margin-top: 10%;
+  margin-top: 10pt;
   margin-bottom: 10%;
 }
 
 #section-three .box2 h2{
-  font-family: 'BaiJamjuree-Light', sans-serif;
-  font-size: 11.5pt;
+  font-family: 'DMMono-Medium', monospace;
+  font-size: 15pt;
   margin: 0;
   text-decoration: none;
-  color: #8d8b4f;
+  color: #473e26;
 }
 
 #section-four{
@@ -879,14 +907,14 @@ canvas {
 
 #section-four .action-button  #go-up h1{
   width: 80%;
-  height: 5vh;
   cursor: pointer;
   padding: 0;
   margin-bottom: 10px;
   color: #951e20;
   text-align: center;
-  font-family: 'DMMono-light', monospace;
+  font-family: 'DMMono', monospace;
   font-size: 10pt;
+  letter-spacing: 0.5pt;
 }
 #section-four .action-button .line{
   background-color: #fff8e8;
@@ -977,5 +1005,4 @@ canvas {
 }
 /* END LANDING */
 /*NEW LANDING PAGE*/
-
 
