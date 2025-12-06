@@ -167,10 +167,10 @@ function getCardUnderPointer(clientX, clientY) {
   const intersects = raycaster.intersectObjects(cards, true);
     if (intersects.length > 0) {
       let obj = intersects[0].object;
-
       while (obj && !cards.includes(obj)) {
         obj = obj.parent;
       }
+      
       if (!obj) return;
 
       if (focusedCard) {
@@ -511,8 +511,6 @@ function onPointerUp(e) {
 
   // --- CASE 2: HOLD + DRAG + RELEASE (slow) → focus on release ---
   if (dt > HOLD_MIN_TIME && card) {
-    // treat as "deliberate" selection after manipulating view
-    focusCard(card);
     return;
   }
 
@@ -583,7 +581,6 @@ loadingManager.onLoad = () => {
     clearTimeout(loadTimeoutId);
     loadTimeoutId = null;
   }
-
   //Opening the landing page on load
   landingOn.disabled =true;
   loaderStatus.textContent = "OPEN INVITATION";
@@ -601,9 +598,6 @@ loadingManager.onLoad = () => {
 };
 
 const loader = new THREE.TextureLoader(loadingManager);
-
-
-
 
 // GEO =========================================================================================================
 // ===== [SECTION] GEOMETRY & CARDS =====
@@ -742,9 +736,10 @@ imgURLs.forEach((url, i) => {
 "After all the seasons we lived through, this is where time has brought us",
 "After all the seasons we lived through, this is where time has brought us",
 "After all the seasons we lived through, this is where time has brought us",
-
 "Ahead lies time we will walk into, a time when we will keep growing and changing",
-      
+"Ahead lies time we will walk into, a time when we will keep growing and changing",
+"Ahead lies time we will walk into, a time when we will keep growing and changing",
+"Ahead lies time we will walk into, a time when we will keep growing and changing",
 "Time moved, and so did we, learning, changing, growing in our own ways, even miles apart",
 "Time moved, and so did we, learning, changing, growing in our own ways, even miles apart",      
 "Time moved, and so did we, learning, changing, growing in our own ways, even miles apart",      
